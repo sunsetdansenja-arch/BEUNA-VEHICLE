@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bintang Surfboards | Premium Surf Gear</title>
+    <style>
+        /* CSS Variables untuk Tema */
+        :root {
+            --primary-maroon: #8b0000;
+            --primary-maroon-hover: #660000;
+            --text-dark: #1d1d1f;
+            --text-light: #f5f5f7;
+            --glass-bg: rgba(255, 255, 255, 0.65);
+            --glass-border: 1px solid rgba(255, 255, 255, 0.4);
+            --border-radius: 24px;
+            --font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        /* Reset & Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-family);
+            color: var(--text-dark);
+            background: linear-gradient(135deg, #e0eafc 0%, #cfdef3 100%);
+            /* Latar belakang gelombang abstrak bisa ditambahkan di sini */
+            background-image: url('https://images.unsplash.com/photo-1502680390469-be75c86b636f?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Navigasi Glassmorphism */
+        nav {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 90%;
+            max-width: 1000px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: var(--glass-border);
+            border-radius: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 32px;
+            z-index: 1000;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.05);
+        }
+
+        .logo {
+            font-weight: 700;
+            font-size: 1.2rem;
+            letter-spacing: -0.5px;
+            color: var(--text-dark);
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 24px;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: var(--text-dark);
+            font-weight: 500;
+            font-size: 0.95rem;
+            transition: color 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            color: var(--primary-maroon);
+        }
+
+        /* Tombol Aksen Marun */
+        .btn-primary {
+            background-color: var(--primary-maroon);
+            color: white;
+            padding: 10px 24px;
+            border-radius: 20px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-maroon-hover);
+            transform: scale(1.02);
+            box-shadow: 0 4px 12px rgba(139, 0, 0, 0.3);
+        }
+
+        /* Hero Section */
+        header.hero {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 0 20px;
+        }
+
+        .hero-content {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: var(--glass-border);
+            padding: 60px 40px;
+            border-radius: var(--border-radius);
+            max-width: 800px;
+            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .hero h1 {
+            font-size: 4rem;
+            font-weight: 800;
+            letter-spacing: -1.5px;
+            margin-bottom: 16px;
+            color: var(--text-dark);
+        }
+
+        .hero p {
+            font-size: 1.25rem;
+            color: #4a4a4a;
+            margin-bottom: 32px;
+            font-weight: 400;
+        }
+
+        /* Bagian Produk */
+        section.products {
+            padding: 100px 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 50px;
+            color: white;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+        }
+
+        .product-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: var(--glass-border);
+            border-radius: var(--border-radius);
+            padding: 24px;
+            text-align: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+        }
+
+        .product-image {
+            width: 100%;
+            height: 350px;
+            object-fit: cover;
+            border-radius: 16px;
+            margin-bottom: 20px;
+            background-color: #f0f0f0; /* Fallback color */
+        }
+
+        .product-info h3 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .product-info p.price {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--primary-maroon);
+            margin-bottom: 20px;
+        }
+
+        /* Footer */
+        footer {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 40px 20px;
+            text-align: center;
+            font-size: 0.9rem;
+            color: #666;
+            border-top: 1px solid rgba(0,0,0,0.05);
+        }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <a href="#" class="logo">Bintang.</a>
+        <div class="nav-links">
+            <a href="#koleksi">Koleksi</a>
+            <a href="#tentang">Tentang Kami</a>
+            <a href="#kontak">Kontak</a>
+        </div>
+        <a href="#shop" class="btn-primary">Pesan Sekarang</a>
+    </nav>
+
+    <header class="hero">
+        <div class="hero-content">
+            <h1>Taklukkan Ombak.</h1>
+            <p>Papan selancar premium yang dirancang untuk performa maksimal dan presisi. Dibuat oleh *surfer* untuk *surfer*.</p>
+            <a href="#koleksi" class="btn-primary" style="padding: 14px 32px; font-size: 1.1rem; border-radius: 24px;">Lihat Katalog</a>
+        </div>
+    </header>
+
+    <section class="products" id="koleksi">
+        <h2 class="section-title">Koleksi Terbaru</h2>
+        <div class="product-grid">
+            
+            <div class="product-card">
+                <img src="https://images.unsplash.com/photo-1537060416972-749e7e72b4f2?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60" alt="Shortboard Bintang" class="product-image">
+                <div class="product-
