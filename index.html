@@ -45,7 +45,7 @@
                     <div class="h-4 w-24 bg-gray-200 rounded"></div>
                 </div>
             </div>
-            </header>
+        </header>
 
         <main class="p-5 pb-24 relative">
             
@@ -72,7 +72,7 @@
 
             <section id="view-form" class="view-transition view-hidden">
                 <div id="selected-vehicle-preview" class="mb-6 p-4 rounded-2xl bg-gray-50 border border-gray-100 flex gap-4 items-center">
-                    </div>
+                </div>
 
                 <h2 class="text-xl font-bold mb-4 tracking-tight">Kapan mau dipakai?</h2>
                 <form id="booking-form" class="space-y-5" onsubmit="submitBooking(event)">
@@ -143,16 +143,19 @@
     </div>
 
     <script>
-        // GANTI INI DENGAN URL WEBHOOK N8N LU!
-        const WEBHOOK_URL = 'https://n8n.domainlu.com/webhook/beuna-vr-api-endpoint';
-        const SUBDOMAIN = 'sewasukabumi'; // Nanti dinamis: window.location.hostname.split('.')[0]
+        // URL Production n8n yang udah bener
+        const WEBHOOK_URL = 'https://n8n.beuna.web.id/webhook/beuna-vr-api-endpoint';
+        
+        // Logika dinamis untuk Vercel Wildcard Subdomain
+        const SUBDOMAIN = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
+            ? 'sewasukabumi' // Fallback aman buat testing di komputer lu
+            : window.location.hostname.split('.')[0]; // Otomatis ngambil nama rental dari URL
 
         let globalTenant = {};
         let globalVehicles = [];
 
         async function init() {
             try {
-                // Fetch data menggunakan metode paralel yang lu buat di N8N
                 const response = await fetch(WEBHOOK_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -172,7 +175,7 @@
                 console.error("Gagal load data:", error);
                 document.getElementById('vehicle-list').innerHTML = `
                     <div class="text-center p-6 bg-red-50 rounded-xl text-red-600 text-sm font-medium border border-red-100">
-                        Waduh, gagal narik data garasi. Coba refresh lagi ya.
+                        Waduh, gagal narik data garasi. Pastikan workflow n8n udah aktif.
                     </div>`;
             }
         }
@@ -180,14 +183,12 @@
         function renderHeader() {
             if(!globalTenant) return;
             
-            // Render Header Sticky
             document.getElementById('header-profile').classList.remove('animate-pulse');
             document.getElementById('header-profile').innerHTML = `
                 <img src="${globalTenant.logo_url || 'https://ui-avatars.com/api/?name='+globalTenant.nama_rental}" class="w-8 h-8 rounded-full border border-gray-200 object-cover">
                 <span class="font-bold text-[15px] tracking-tight">${globalTenant.nama_rental}</span>
             `;
 
-            // Render Bio di halaman utama
             document.getElementById('tenant-bio-container').classList.remove('animate-pulse');
             document.getElementById('tenant-bio-container').innerHTML = `
                 <h1 class="text-2xl font-bold tracking-tight mb-1">Pilih Kendaraan</h1>
@@ -206,9 +207,8 @@
 
             globalVehicles.forEach(v => {
                 const hargaFormat = new Intl.NumberFormat('id-ID', { maximumFractionDigits: 0 }).format(v.harga_per_hari);
-                const isAvailable = v.is_available === true || v.is_available === "true"; // Handle string/boolean dari CSV
+                const isAvailable = v.is_available === true || v.is_available === "true";
                 
-                // Card UI (Layout A) - Border tipis, active scale, monokrom dominan
                 const card = document.createElement('div');
                 card.className = `p-3 flex gap-4 border border-gray-200 rounded-2xl bg-white shadow-sm transition-all active:scale-[0.98] ${!isAvailable ? 'opacity-50 grayscale' : 'cursor-pointer hover:border-gray-300'}`;
                 
@@ -237,15 +237,12 @@
             });
         }
 
-        // --- NAVIGATION LOGIC ---
         function selectVehicle(id) {
             const vehicle = globalVehicles.find(v => v.vehicle_id === id);
             if(!vehicle) return;
 
-            // Set Data di Form
             document.getElementById('form-vehicle-id').value = vehicle.vehicle_id;
             
-            // Tampilkan Preview Kecil di atas Form
             const hargaFormat = new Intl.NumberFormat('id-ID').format(vehicle.harga_per_hari);
             document.getElementById('selected-vehicle-preview').innerHTML = `
                 <img src="${vehicle.foto_url}" class="w-12 h-12 rounded-lg object-cover border border-gray-200">
@@ -283,34 +280,30 @@
             document.getElementById('header-back-btn').classList.add('hidden');
         }
 
-        // --- FORM HELPERS ---
         function ubahJumlah(tipe, nilai) {
             const input = document.getElementById(`jumlah_${tipe}`);
             const display = document.getElementById(`jumlah_${tipe}_display`);
             let current = parseInt(input.value) || 0;
             let newVal = current + nilai;
-            if (newVal < 0) newVal = 0; // Gak boleh minus
+            if (newVal < 0) newVal = 0; 
             
             input.value = newVal;
             display.innerText = newVal;
         }
 
-        // --- SUBMIT LOGIC ---
         async function submitBooking(e) {
             e.preventDefault();
             const btn = document.getElementById('btn-submit');
             
-            // UI Button Loading
             const originalBtnText = btn.innerHTML;
             btn.innerHTML = `<svg class="animate-spin -ml-1 mr-2 h-5 w-5 text-white inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> <span>Menyiapkan Data...</span>`;
             btn.disabled = true;
 
-            // Kumpulkan Data Form
             const payload = {
-                action: 'insert_book', // Sesuai n8n Switch
-                tenant_id: globalTenant.tenant_id || globalTenant.id, // Pastikan field sesuai CSV
+                action: 'insert_book',
+                tenant_id: globalTenant.tenant_id || globalTenant.id,
                 vehicle_id: document.getElementById('form-vehicle-id').value,
-                booking_id: 'BK-' + Date.now(), // Auto generate ID simple
+                booking_id: 'BK-' + Date.now(),
                 waktu_mulai: document.getElementById('waktu_mulai').value,
                 waktu_selesai: document.getElementById('waktu_selesai').value,
                 alamat_antar: document.getElementById('alamat_antar').value,
@@ -320,23 +313,20 @@
                 pekerjaan: document.getElementById('pekerjaan').value,
                 no_darurat: document.getElementById('no_darurat').value,
                 jumlah_helm: document.getElementById('jumlah_helm').value,
-                // Kolom dummy untuk lengkapin CSV
-                alamat_jemput: document.getElementById('alamat_antar').value, // Disamakan
+                alamat_jemput: document.getElementById('alamat_antar').value,
                 jumlah_jashujan: 1, 
                 dokumen_jaminan: 'KTP (Kirim via WA)',
                 tujuan_penggunaan: 'Jalan-jalan'
             };
 
             try {
-                // Tembak Webhook untuk Insert Booking
                 await fetch(WEBHOOK_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
                 });
 
-                // Setelah berhasil insert, kita lempar customer ke WhatsApp Owner
-                const noWaOwner = globalTenant.no_wa_owner.replace(/^0/, '62'); // Pastikan format 62
+                const noWaOwner = globalTenant.no_wa_owner.replace(/^0/, '62');
                 const vehicleName = globalVehicles.find(v => v.vehicle_id === payload.vehicle_id).nama_kendaraan;
                 
                 const waText = `Halo admin *${globalTenant.nama_rental}*, saya mau sewa unit ini:\n\n` +
@@ -348,7 +338,6 @@
 
                 const waUrl = `https://wa.me/${noWaOwner}?text=${encodeURIComponent(waText)}`;
                 
-                // Lempar ke WA
                 window.location.href = waUrl;
 
             } catch (error) {
@@ -359,7 +348,6 @@
             }
         }
 
-        // Mulai aplikasi
         init();
     </script>
 </body>
