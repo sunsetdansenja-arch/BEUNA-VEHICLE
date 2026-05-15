@@ -57,12 +57,12 @@
                 
                 <div class="flex items-center justify-between mb-6">
                     <h2 class="text-xl font-bold tracking-tight">Tambah Motor Baru</h2>
-                    <button onclick="toggleModal('add-modal', false)" class="p-2 bg-gray-100 rounded-full active:scale-90 transition-transform">
+                    <button type="button" onclick="toggleModal('add-modal', false)" class="p-2 bg-gray-100 rounded-full active:scale-90 transition-transform">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
                     </button>
                 </div>
 
-                <form id="add-vehicle-form" onsubmit="submitVehicle(event)" class="space-y-4">
+                <form id="add-vehicle-form" onsubmit="submitVehicle(event, 'insert')" class="space-y-4">
                     <div>
                         <label class="block text-xs font-medium text-gray-500 mb-1">Nama Kendaraan</label>
                         <input type="text" id="v-name" required placeholder="Contoh: Honda Vario 160" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand focus:bg-white transition-all">
@@ -82,8 +82,53 @@
                         <input type="url" id="v-image" placeholder="https://..." class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand focus:bg-white transition-all">
                     </div>
 
-                    <button type="submit" id="btn-submit-vehicle" class="w-full bg-black text-white font-bold py-4 rounded-xl shadow-md active:scale-95 transition-all mt-4 flex justify-center items-center gap-2">
+                    <button type="submit" id="btn-submit-add" class="w-full bg-black text-white font-bold py-4 rounded-xl shadow-md active:scale-95 transition-all mt-4 flex justify-center items-center gap-2">
                         Simpan ke Garasi
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <div id="edit-modal" class="hidden fixed inset-0 bg-black/60 z-[100] flex items-end sm:items-center justify-center sm:p-4 backdrop-blur-sm transition-opacity">
+            <div class="bg-white w-full max-w-md rounded-t-3xl sm:rounded-3xl p-6 shadow-2xl relative transform transition-transform translate-y-full sm:translate-y-0" id="edit-modal-content">
+                
+                <div class="flex items-center justify-between mb-6">
+                    <h2 class="text-xl font-bold tracking-tight">Edit Motor</h2>
+                    <button type="button" onclick="toggleModal('edit-modal', false)" class="p-2 bg-gray-100 rounded-full active:scale-90 transition-transform">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                    </button>
+                </div>
+
+                <form id="edit-vehicle-form" onsubmit="submitVehicle(event, 'update')" class="space-y-4">
+                    <input type="hidden" id="e-id"> <div>
+                        <label class="block text-xs font-medium text-gray-500 mb-1">Status Ketersediaan</label>
+                        <select id="e-status" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand focus:bg-white transition-all font-bold">
+                            <option value="true">🟢 Tersedia (Bisa Disewa)</option>
+                            <option value="false">🔴 Sedang Disewa / Rusak</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-medium text-gray-500 mb-1">Nama Kendaraan</label>
+                        <input type="text" id="e-name" required class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand focus:bg-white transition-all">
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-medium text-gray-500 mb-1">Tipe</label>
+                            <input type="text" id="e-type" required class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand focus:bg-white transition-all">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-gray-500 mb-1">Harga/Hari</label>
+                            <input type="number" id="e-price" required class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand focus:bg-white transition-all">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-gray-500 mb-1">URL Foto</label>
+                        <input type="url" id="e-image" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand focus:bg-white transition-all">
+                    </div>
+
+                    <button type="submit" id="btn-submit-edit" class="w-full bg-brand text-white font-bold py-4 rounded-xl shadow-md shadow-brand/30 active:scale-95 transition-all mt-4 flex justify-center items-center gap-2">
+                        Update Data
                     </button>
                 </form>
             </div>
@@ -93,18 +138,17 @@
 
     <script>
         const WEBHOOK_URL = 'https://n8n-mzbmiib3etk4.kangkung.sumopod.my.id/webhook/beuna-vr-api';
-        const HARDCODED_SUBDOMAIN = 'mototest'; // Tembakan utama
+        const HARDCODED_SUBDOMAIN = 'mototest';
 
         let globalVehicles = [];
 
-        // 1. FUNGSI TARIK DATA (Waktu halaman dibuka)
+        // 1. TARIK DATA (Waktu halaman dibuka)
         window.onload = async function loadDashboard() {
             const loading = document.getElementById('loading-indicator');
             const list = document.getElementById('owner-vehicle-list');
             const errorMsg = document.getElementById('error-message');
             const tenantName = document.getElementById('tenant-name-display');
 
-            // Reset UI
             loading.classList.remove('hidden');
             list.classList.add('hidden');
             errorMsg.classList.add('hidden');
@@ -141,7 +185,7 @@
             }
         };
 
-        // 2. FUNGSI RENDER HTML LIST MOTOR
+        // 2. RENDER HTML LIST MOTOR
         function renderVehicles() {
             const list = document.getElementById('owner-vehicle-list');
             list.innerHTML = '';
@@ -156,18 +200,18 @@
                 const isAvail = v.is_available === true || String(v.is_available).toLowerCase() === "true";
                 
                 list.innerHTML += `
-                    <div class="p-4 border border-gray-200 rounded-2xl bg-white shadow-sm flex items-center justify-between gap-4 transition-all hover:border-gray-300">
+                    <div class="p-4 border border-gray-200 rounded-2xl bg-white shadow-sm flex items-center justify-between gap-4 transition-all hover:border-gray-300 ${!isAvail ? 'bg-gray-50' : ''}">
                         <div class="flex items-center gap-3">
-                            <img src="${v.foto_url || 'https://placehold.co/100?text=Motor'}" class="w-12 h-12 rounded-lg object-cover border border-gray-100 bg-gray-50">
+                            <img src="${v.foto_url || 'https://placehold.co/100?text=Motor'}" class="w-12 h-12 rounded-lg object-cover border border-gray-100 ${!isAvail ? 'grayscale' : 'bg-gray-50'}">
                             <div>
-                                <h3 class="font-bold text-[15px] leading-tight text-gray-900">${v.nama_kendaraan || 'Tanpa Nama'}</h3>
-                                <p class="text-xs text-brand font-bold mt-0.5">Rp${harga}<span class="text-gray-400 font-medium">/hari</span></p>
+                                <h3 class="font-bold text-[15px] leading-tight ${!isAvail ? 'text-gray-500' : 'text-gray-900'}">${v.nama_kendaraan || 'Tanpa Nama'}</h3>
+                                <p class="text-xs ${!isAvail ? 'text-gray-400' : 'text-brand font-bold'} mt-0.5">Rp${harga}<span class="text-gray-400 font-medium">/hari</span></p>
                             </div>
                         </div>
                         <div class="flex items-center gap-3">
                             <div class="w-2.5 h-2.5 rounded-full ${isAvail ? 'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.5)]' : 'bg-red-500'}"></div>
-                            <button onclick="alert('Nanti buka form edit buat ${v.nama_kendaraan}')" class="p-2 bg-gray-50 hover:bg-gray-100 rounded-full transition-colors border border-gray-200 active:scale-90">
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-600"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>
+                            <button onclick="openEditModal('${v.vehicle_id}')" class="p-2 bg-gray-50 hover:bg-gray-200 rounded-full transition-colors border border-gray-200 active:scale-90 text-gray-600">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>
                             </button>
                         </div>
                     </div>
@@ -181,56 +225,72 @@
             const content = document.getElementById(modalId + '-content');
             if (show) {
                 modal.classList.remove('hidden');
-                setTimeout(() => {
-                    content.classList.remove('translate-y-full');
-                }, 10);
+                setTimeout(() => { content.classList.remove('translate-y-full'); }, 10);
             } else {
                 content.classList.add('translate-y-full');
-                setTimeout(() => {
-                    modal.classList.add('hidden');
-                    document.getElementById('add-vehicle-form').reset();
+                setTimeout(() => { 
+                    modal.classList.add('hidden'); 
+                    if(modalId === 'add-modal') document.getElementById('add-vehicle-form').reset();
+                    if(modalId === 'edit-modal') document.getElementById('edit-vehicle-form').reset();
                 }, 300);
             }
         }
 
-        // 4. FUNGSI INSERT DATA KE N8N
-        async function submitVehicle(e) {
+        // 4. SIAPIN DATA KE FORM EDIT
+        function openEditModal(vehicleId) {
+            const vehicle = globalVehicles.find(v => v.vehicle_id === vehicleId);
+            if (!vehicle) return;
+
+            // Suntik data lama ke input box
+            document.getElementById('e-id').value = vehicle.vehicle_id;
+            document.getElementById('e-name').value = vehicle.nama_kendaraan || '';
+            document.getElementById('e-type').value = vehicle.tipe_kendaraan || '';
+            document.getElementById('e-price').value = vehicle.harga_per_hari || '';
+            document.getElementById('e-image').value = vehicle.foto_url || '';
+            
+            // Atur status dropdown
+            const isAvail = vehicle.is_available === true || String(vehicle.is_available).toLowerCase() === "true";
+            document.getElementById('e-status').value = isAvail ? "true" : "false";
+
+            toggleModal('edit-modal', true);
+        }
+
+        // 5. EKSEKUSI INSERT & UPDATE N8N (Satu fungsi buat dua keperluan)
+        async function submitVehicle(e, actionType) {
             e.preventDefault();
-            const btn = document.getElementById('btn-submit-vehicle');
+            
+            const isUpdate = actionType === 'update';
+            const btnId = isUpdate ? 'btn-submit-edit' : 'btn-submit-add';
+            const btn = document.getElementById(btnId);
             const originalBtnText = btn.innerHTML;
             
-            // Animasi Loading Tombol
             btn.innerHTML = `<svg class="animate-spin -ml-1 mr-2 h-5 w-5 text-white inline" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Menyimpan...`;
             btn.disabled = true;
 
-            // Merakit Payload Data
+            const prefix = isUpdate ? 'e-' : 'v-';
             const payload = {
-                action: 'insert_vehicle', // Memicu Switch N8N jalur insert
+                action: isUpdate ? 'update_vehicle' : 'insert_vehicle',
                 tenant_id: HARDCODED_SUBDOMAIN,
-                vehicle_id: 'VHC-' + Date.now(), // Generate ID unik
-                nama_kendaraan: document.getElementById('v-name').value,
-                tipe_kendaraan: document.getElementById('v-type').value,
-                harga_per_hari: document.getElementById('v-price').value,
-                foto_url: document.getElementById('v-image').value,
-                is_available: true // Default pas baru ditambah langsung tersedia
+                vehicle_id: isUpdate ? document.getElementById('e-id').value : 'VHC-' + Date.now(),
+                nama_kendaraan: document.getElementById(prefix + 'name').value,
+                tipe_kendaraan: document.getElementById(prefix + 'type').value,
+                harga_per_hari: document.getElementById(prefix + 'price').value,
+                foto_url: document.getElementById(prefix + 'image').value,
+                is_available: isUpdate ? (document.getElementById('e-status').value === "true") : true
             };
 
             try {
-                // Tembak Webhook
                 await fetch(WEBHOOK_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
                 });
 
-                // Kalau sukses: Tutup pop-up, lalu muat ulang list garasi
-                toggleModal('add-modal', false);
-                setTimeout(() => {
-                    window.onload(); // Refresh data otomatis dari N8N
-                }, 500);
+                toggleModal(isUpdate ? 'edit-modal' : 'add-modal', false);
+                setTimeout(() => { window.onload(); }, 500); // Auto-refresh data!
 
             } catch (error) {
-                alert("Koneksi terputus. Gagal menyimpan kendaraan.");
+                alert("Koneksi terputus. Gagal menyimpan.");
             } finally {
                 btn.innerHTML = originalBtnText;
                 btn.disabled = false;
