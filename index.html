@@ -1,218 +1,304 @@
-<script>
-        // URL Production n8n lu yang baru
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dev Portal | RentalinBy</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: '#FF5A00',
+                        'brand-hover': '#e04f00'
+                    },
+                    fontFamily: {
+                        sans: ['-apple-system', 'BlinkMacSystemFont', '"San Francisco"', '"Segoe UI"', 'Roboto', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        ::-webkit-scrollbar { display: none; }
+        body { -ms-overflow-style: none; scrollbar-width: none; background-color: #f5f5f7; }
+        .view-section { display: none; animation: fadeIn 0.3s ease; }
+        .view-section.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body class="text-gray-900 antialiased min-h-screen">
+
+    <div class="max-w-md mx-auto min-h-screen bg-white shadow-xl shadow-gray-200/50 border-x border-gray-100 relative overflow-hidden">
+        
+        <section id="view-auth" class="view-section active h-screen flex flex-col justify-center px-6">
+            <div class="text-center mb-8">
+                <div class="w-16 h-16 bg-gray-100 rounded-2xl mx-auto flex items-center justify-center mb-4 border border-gray-200">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-400"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+                </div>
+                <h1 class="text-2xl font-bold tracking-tight">Dev Portal</h1>
+                <p class="text-gray-500 text-sm mt-1">Masukkan ID Tenant untuk tes koneksi n8n</p>
+            </div>
+
+            <form onsubmit="handleLogin(event)" class="space-y-4">
+                <input type="text" id="tenant-input" required placeholder="Contoh: mototest" class="w-full bg-gray-50 border border-gray-200 rounded-2xl px-4 py-4 text-[15px] focus:outline-none focus:ring-2 focus:ring-brand focus:bg-white transition-all text-center font-medium placeholder:font-normal">
+                <button type="submit" id="btn-login" class="w-full bg-black text-white font-bold py-4 rounded-2xl shadow-md active:scale-95 transition-all flex justify-center items-center gap-2">
+                    <span>Cari Tenant</span>
+                </button>
+            </form>
+            <div id="login-error" class="text-red-500 text-sm text-center mt-4 hidden font-medium"></div>
+        </section>
+
+        <section id="view-role" class="view-section h-screen flex flex-col pt-12 px-6">
+            <button onclick="switchView('view-auth')" class="absolute top-6 left-6 p-2 bg-gray-100 rounded-full active:scale-90 transition-transform">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+            </button>
+
+            <div class="text-center mt-12 mb-8">
+                <p class="text-sm text-gray-500 font-medium mb-1">Terhubung dengan:</p>
+                <h2 id="role-tenant-name" class="text-2xl font-bold tracking-tight text-brand">Nama Tenant</h2>
+            </div>
+
+            <div class="space-y-4">
+                <button onclick="switchView('view-customer')" class="w-full p-6 border border-gray-200 rounded-3xl bg-white shadow-sm active:scale-95 transition-all text-left group hover:border-gray-300">
+                    <div class="flex items-center justify-between mb-2">
+                        <h3 class="text-lg font-bold">Etalase Customer</h3>
+                        <div class="w-8 h-8 rounded-full bg-gray-50 flex items-center justify-center group-hover:bg-gray-100 transition-colors">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                        </div>
+                    </div>
+                    <p class="text-sm text-gray-500">Lihat UI pemesanan dan katalog ala Apple OS.</p>
+                </button>
+
+                <button onclick="switchView('view-owner')" class="w-full p-6 border border-gray-200 rounded-3xl bg-white shadow-sm active:scale-95 transition-all text-left group hover:border-gray-300">
+                    <div class="flex items-center justify-between mb-2">
+                        <h3 class="text-lg font-bold">Dashboard Owner</h3>
+                        <div class="w-8 h-8 rounded-full bg-gray-50 flex items-center justify-center group-hover:bg-gray-100 transition-colors">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                        </div>
+                    </div>
+                    <p class="text-sm text-gray-500">Lihat UI admin untuk kelola armada kendaraan.</p>
+                </button>
+            </div>
+        </section>
+
+        <section id="view-customer" class="view-section relative min-h-screen">
+            <header class="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100 px-5 py-4 flex items-center gap-3">
+                <button id="cust-back-btn" onclick="handleCustomerBack()" class="p-2 -ml-2 rounded-full hover:bg-gray-100 transition-colors">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+                </button>
+                <div id="cust-header-profile" class="flex items-center gap-3">
+                    <img id="cust-logo" src="" class="w-8 h-8 rounded-full border border-gray-200 object-cover">
+                    <span id="cust-title" class="font-bold text-[15px] tracking-tight">Rental</span>
+                </div>
+            </header>
+
+            <main class="p-5 pb-24">
+                <div id="cust-catalog-wrapper">
+                    <div class="mb-6">
+                        <h1 class="text-2xl font-bold tracking-tight mb-1">Pilih Kendaraan</h1>
+                        <p id="cust-bio" class="text-sm text-gray-500 leading-relaxed">-</p>
+                    </div>
+                    <div id="vehicle-list" class="space-y-4"></div>
+                </div>
+
+                <div id="cust-form-wrapper" class="hidden">
+                    <div id="selected-vehicle-preview" class="mb-6 p-4 rounded-2xl bg-gray-50 border border-gray-100 flex gap-4 items-center"></div>
+                    <h2 class="text-xl font-bold mb-4 tracking-tight">Kapan mau dipakai?</h2>
+                    <div class="p-6 border border-gray-200 rounded-3xl text-center bg-gray-50">
+                        <p class="text-sm text-gray-500 font-medium">Form Booking disembunyikan untuk fokus tes routing.</p>
+                        <p class="text-xs text-gray-400 mt-2">Nanti tinggal masukin form yg di file sebelumnya ke div ini.</p>
+                    </div>
+                </div>
+            </main>
+        </section>
+
+        <section id="view-owner" class="view-section relative min-h-screen bg-gray-50">
+            <header class="sticky top-0 z-50 bg-white border-b border-gray-200 px-5 py-4 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <button onclick="switchView('view-role')" class="p-2 -ml-2 rounded-full hover:bg-gray-100 transition-colors">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+                    </button>
+                    <span class="font-bold text-[15px] tracking-tight">Dashboard Admin</span>
+                </div>
+            </header>
+
+            <main class="p-5">
+                <div class="flex items-center justify-between mb-6">
+                    <h2 class="text-xl font-bold tracking-tight">Garasi Anda</h2>
+                    <button class="bg-black text-white text-xs font-bold px-4 py-2 rounded-full active:scale-95 transition-all shadow-sm">
+                        + Tambah
+                    </button>
+                </div>
+
+                <div id="owner-vehicle-list" class="space-y-3">
+                    </div>
+            </main>
+        </section>
+
+    </div>
+
+    <script>
         const WEBHOOK_URL = 'https://n8n-mzbmiib3etk4.kangkung.sumopod.my.id/webhook/beuna-vr-api';
         
-        // Logika dinamis yang anti-error kalau lu cuma double-click file HTML di laptop
-        let SUBDOMAIN = 'sewasukabumi'; // Fallback aman buat testing
-        if (window.location.hostname && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
-            SUBDOMAIN = window.location.hostname.split('.')[0];
-        }
-
+        let activeTenantId = '';
         let globalTenant = {};
         let globalVehicles = [];
+        let isFormOpen = false;
 
-        async function init() {
+        // Fungsi Ganti Tampilan Antar Layar
+        function switchView(viewId) {
+            document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
+            document.getElementById(viewId).classList.add('active');
+            window.scrollTo({ top: 0 });
+        }
+
+        // ==========================================
+        // 1. LOGIC AUTH (DEV LOGIN)
+        // ==========================================
+        async function handleLogin(e) {
+            e.preventDefault();
+            const input = document.getElementById('tenant-input').value.trim();
+            const btn = document.getElementById('btn-login');
+            const err = document.getElementById('login-error');
+            
+            if(!input) return;
+
+            // UI Loading
+            const originalBtn = btn.innerHTML;
+            btn.innerHTML = `<svg class="animate-spin h-5 w-5 text-white" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>`;
+            err.classList.add('hidden');
+
             try {
-                // Tambahin console.log buat ngetrack di Inspect Element
-                console.log("Mencoba narik data dari:", WEBHOOK_URL);
-                console.log("Subdomain yang dipakai:", SUBDOMAIN);
-
+                // Tarik data pakai Subdomain yang diinput
                 const response = await fetch(WEBHOOK_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ action: 'get', subdomain: SUBDOMAIN })
+                    body: JSON.stringify({ action: 'get', subdomain: input })
                 });
                 
                 const resData = await response.json();
-                console.log("Response dari n8n:", resData); // Biar lu bisa liat isinya
                 
-                if(resData.status === 'success') {
+                if(resData.status === 'success' && resData.data.tenant) {
+                    // Berhasil Login
+                    activeTenantId = input;
                     globalTenant = resData.data.tenant;
-                    globalVehicles = resData.data.vehicles;
+                    globalVehicles = resData.data.vehicles || [];
                     
-                    renderHeader();
-                    renderCatalog();
+                    // Setup UI lanjutan
+                    document.getElementById('role-tenant-name').innerText = globalTenant.nama_rental;
+                    setupCustomerView();
+                    setupOwnerView();
+                    
+                    switchView('view-role');
                 } else {
-                    throw new Error(resData.message || "Status bukan success");
+                    throw new Error("Tenant tidak ditemukan.");
                 }
             } catch (error) {
-                console.error("Gagal load data (Bisa jadi CORS, URL salah, atau n8n mati):", error);
-                document.getElementById('vehicle-list').innerHTML = `
-                    <div class="text-center p-6 bg-red-50 rounded-xl text-red-600 text-sm font-medium border border-red-100">
-                        Waduh, gagal narik data garasi. Coba cek console browser (F12).
-                    </div>`;
+                err.innerText = error.message === "Tenant tidak ditemukan." ? error.message : "Gagal terhubung ke N8N.";
+                err.classList.remove('hidden');
+            } finally {
+                btn.innerHTML = originalBtn;
             }
         }
 
-        function renderHeader() {
-            if(!globalTenant) return;
+        // ==========================================
+        // 2. LOGIC CUSTOMER VIEW
+        // ==========================================
+        function setupCustomerView() {
+            document.getElementById('cust-logo').src = globalTenant.logo_url || `https://ui-avatars.com/api/?name=${globalTenant.nama_rental}&background=f3f4f6`;
+            document.getElementById('cust-title').innerText = globalTenant.nama_rental;
+            document.getElementById('cust-bio').innerText = globalTenant.bio_deskripsi || 'Sewa kendaraan terpercaya.';
             
-            document.getElementById('header-profile').classList.remove('animate-pulse');
-            document.getElementById('header-profile').innerHTML = `
-                <img src="${globalTenant.logo_url || 'https://ui-avatars.com/api/?name='+globalTenant.nama_rental}" class="w-8 h-8 rounded-full border border-gray-200 object-cover">
-                <span class="font-bold text-[15px] tracking-tight">${globalTenant.nama_rental}</span>
-            `;
-
-            document.getElementById('tenant-bio-container').classList.remove('animate-pulse');
-            document.getElementById('tenant-bio-container').innerHTML = `
-                <h1 class="text-2xl font-bold tracking-tight mb-1">Pilih Kendaraan</h1>
-                <p class="text-sm text-gray-500 leading-relaxed">${globalTenant.bio_deskripsi || 'Sewa motor cepat, aman, dan terpercaya.'}</p>
-            `;
-        }
-
-        function renderCatalog() {
-            const listContainer = document.getElementById('vehicle-list');
-            listContainer.innerHTML = '';
-
-            if (!globalVehicles || globalVehicles.length === 0) {
-                listContainer.innerHTML = `<p class="text-center text-sm text-gray-400 py-10">Belum ada kendaraan yang terdaftar.</p>`;
+            const list = document.getElementById('vehicle-list');
+            list.innerHTML = '';
+            
+            if(globalVehicles.length === 0) {
+                list.innerHTML = `<p class="text-sm text-gray-400 text-center py-6">Garasi kosong.</p>`;
                 return;
             }
 
             globalVehicles.forEach(v => {
-                const hargaFormat = new Intl.NumberFormat('id-ID', { maximumFractionDigits: 0 }).format(v.harga_per_hari);
-                const isAvailable = v.is_available === true || v.is_available === "true";
+                const harga = new Intl.NumberFormat('id-ID').format(v.harga_per_hari);
+                const isAvail = v.is_available === true || v.is_available === "true";
                 
-                const card = document.createElement('div');
-                card.className = `p-3 flex gap-4 border border-gray-200 rounded-2xl bg-white shadow-sm transition-all active:scale-[0.98] ${!isAvailable ? 'opacity-50 grayscale' : 'cursor-pointer hover:border-gray-300'}`;
-                
-                if(isAvailable) {
-                    card.onclick = () => selectVehicle(v.vehicle_id);
-                }
-
-                card.innerHTML = `
-                    <div class="w-[100px] h-[100px] rounded-[10px] overflow-hidden shrink-0 bg-gray-50 border border-gray-100">
-                        <img src="${v.foto_url || 'https://placehold.co/200x200?text=No+Image'}" alt="${v.nama_kendaraan}" class="w-full h-full object-cover">
-                    </div>
-                    <div class="flex-1 flex flex-col justify-between py-1 pr-1">
-                        <div>
-                            <h3 class="font-bold text-[15px] leading-tight text-gray-900 line-clamp-2">${v.nama_kendaraan}</h3>
-                            <p class="text-brand font-bold text-sm mt-1">Rp${hargaFormat} <span class="text-xs font-normal text-gray-400">/hari</span></p>
+                list.innerHTML += `
+                    <div onclick="${isAvail ? `openBookingForm('${v.vehicle_id}')` : ''}" class="p-3 flex gap-4 border border-gray-200 rounded-2xl bg-white shadow-sm transition-all active:scale-[0.98] ${!isAvail ? 'opacity-50 grayscale' : 'cursor-pointer hover:border-gray-300'}">
+                        <div class="w-[100px] h-[100px] rounded-[10px] overflow-hidden shrink-0 bg-gray-50 border border-gray-100">
+                            <img src="${v.foto_url || 'https://placehold.co/200x200?text=No+Image'}" class="w-full h-full object-cover">
                         </div>
-                        <div class="mt-2">
-                            ${isAvailable 
-                                ? `<button class="text-[11px] font-bold bg-black text-white px-4 py-1.5 rounded-full inline-flex items-center gap-1">Pilih <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>` 
-                                : `<span class="text-[11px] font-semibold bg-gray-100 text-gray-500 px-3 py-1 rounded-full">Lagi disewa</span>`
-                            }
+                        <div class="flex-1 flex flex-col justify-between py-1 pr-1">
+                            <div>
+                                <h3 class="font-bold text-[15px] leading-tight line-clamp-2">${v.nama_kendaraan}</h3>
+                                <p class="text-brand font-bold text-sm mt-1">Rp${harga}</p>
+                            </div>
+                            <div class="mt-2">
+                                ${isAvail 
+                                    ? `<button class="text-[11px] font-bold bg-black text-white px-4 py-1.5 rounded-full inline-flex items-center gap-1">Pilih <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>` 
+                                    : `<span class="text-[11px] font-semibold bg-gray-100 text-gray-500 px-3 py-1 rounded-full">Disewa</span>`
+                                }
+                            </div>
                         </div>
                     </div>
                 `;
-                listContainer.appendChild(card);
             });
         }
 
-        function selectVehicle(id) {
-            const vehicle = globalVehicles.find(v => v.vehicle_id === id);
-            if(!vehicle) return;
-
-            document.getElementById('form-vehicle-id').value = vehicle.vehicle_id;
-            
-            const hargaFormat = new Intl.NumberFormat('id-ID').format(vehicle.harga_per_hari);
-            document.getElementById('selected-vehicle-preview').innerHTML = `
-                <img src="${vehicle.foto_url}" class="w-12 h-12 rounded-lg object-cover border border-gray-200">
-                <div>
-                    <div class="text-xs text-gray-500 font-medium">Pilihanmu</div>
-                    <div class="font-bold text-sm leading-tight">${vehicle.nama_kendaraan}</div>
-                </div>
-                <div class="ml-auto text-right">
-                    <div class="text-[10px] text-gray-400">Harga</div>
-                    <div class="font-bold text-brand text-xs">Rp${hargaFormat}</div>
-                </div>
-            `;
-
-            showForm();
+        function openBookingForm(id) {
+            isFormOpen = true;
+            document.getElementById('cust-catalog-wrapper').classList.add('hidden');
+            document.getElementById('cust-form-wrapper').classList.remove('hidden');
+            window.scrollTo({ top: 0 });
         }
 
-        function showForm() {
-            document.getElementById('view-catalog').classList.remove('view-active');
-            document.getElementById('view-catalog').classList.add('view-hidden');
-            
-            document.getElementById('view-form').classList.remove('view-hidden');
-            document.getElementById('view-form').classList.add('view-active');
-            
-            document.getElementById('header-back-btn').classList.remove('hidden');
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-
-        function showCatalog() {
-            document.getElementById('view-form').classList.remove('view-active');
-            document.getElementById('view-form').classList.add('view-hidden');
-            
-            document.getElementById('view-catalog').classList.remove('view-hidden');
-            document.getElementById('view-catalog').classList.add('view-active');
-            
-            document.getElementById('header-back-btn').classList.add('hidden');
-        }
-
-        function ubahJumlah(tipe, nilai) {
-            const input = document.getElementById(`jumlah_${tipe}`);
-            const display = document.getElementById(`jumlah_${tipe}_display`);
-            let current = parseInt(input.value) || 0;
-            let newVal = current + nilai;
-            if (newVal < 0) newVal = 0; 
-            
-            input.value = newVal;
-            display.innerText = newVal;
-        }
-
-        async function submitBooking(e) {
-            e.preventDefault();
-            const btn = document.getElementById('btn-submit');
-            
-            const originalBtnText = btn.innerHTML;
-            btn.innerHTML = `<svg class="animate-spin -ml-1 mr-2 h-5 w-5 text-white inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> <span>Menyiapkan Data...</span>`;
-            btn.disabled = true;
-
-            const payload = {
-                action: 'insert_book',
-                tenant_id: globalTenant.tenant_id || globalTenant.id || 'T-001',
-                vehicle_id: document.getElementById('form-vehicle-id').value,
-                booking_id: 'BK-' + Date.now(),
-                waktu_mulai: document.getElementById('waktu_mulai').value,
-                waktu_selesai: document.getElementById('waktu_selesai').value,
-                alamat_antar: document.getElementById('alamat_antar').value,
-                nama_lengkap: document.getElementById('nama_lengkap').value,
-                no_wa_customer: document.getElementById('no_wa_customer').value,
-                akun_sosmed: document.getElementById('akun_sosmed').value,
-                pekerjaan: document.getElementById('pekerjaan').value,
-                no_darurat: document.getElementById('no_darurat').value,
-                jumlah_helm: document.getElementById('jumlah_helm').value,
-                alamat_jemput: document.getElementById('alamat_antar').value,
-                jumlah_jashujan: 1, 
-                dokumen_jaminan: 'KTP (Kirim via WA)',
-                tujuan_penggunaan: 'Jalan-jalan'
-            };
-
-            try {
-                const response = await fetch(WEBHOOK_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-                
-                const res = await response.json();
-                if(res.status !== 'success') throw new Error("Gagal disave di backend");
-
-                const noWaOwner = globalTenant.no_wa_owner.replace(/^0/, '62');
-                const vehicleName = globalVehicles.find(v => v.vehicle_id === payload.vehicle_id).nama_kendaraan;
-                
-                const waText = `Halo admin *${globalTenant.nama_rental}*, saya mau sewa unit ini:\n\n` +
-                               `🏍️ *Unit:* ${vehicleName}\n` +
-                               `📅 *Mulai:* ${payload.waktu_mulai.replace('T', ' ')}\n` +
-                               `📅 *Selesai:* ${payload.waktu_selesai.replace('T', ' ')}\n` +
-                               `📍 *Antar ke:* ${payload.alamat_antar}\n\n` +
-                               `Data diri saya (Nama: ${payload.nama_lengkap}) sudah diisi di aplikasi. Ini foto KTP saya untuk jaminan...`;
-
-                const waUrl = `https://wa.me/${noWaOwner}?text=${encodeURIComponent(waText)}`;
-                window.location.href = waUrl;
-
-            } catch (error) {
-                console.error("Gagal Booking:", error);
-                alert("Yah, koneksi terputus. Coba klik Lanjut lagi ya.");
-                btn.innerHTML = originalBtnText;
-                btn.disabled = false;
+        function handleCustomerBack() {
+            if (isFormOpen) {
+                // Balik ke Katalog
+                isFormOpen = false;
+                document.getElementById('cust-form-wrapper').classList.add('hidden');
+                document.getElementById('cust-catalog-wrapper').classList.remove('hidden');
+            } else {
+                // Balik ke Pilih Role
+                switchView('view-role');
             }
         }
 
-        init();
+        // ==========================================
+        // 3. LOGIC OWNER VIEW (Dashboard)
+        // ==========================================
+        function setupOwnerView() {
+            const list = document.getElementById('owner-vehicle-list');
+            list.innerHTML = '';
+            
+            if(globalVehicles.length === 0) {
+                list.innerHTML = `<p class="text-sm text-gray-400 text-center py-6">Belum ada kendaraan. Klik Tambah.</p>`;
+                return;
+            }
+
+            globalVehicles.forEach(v => {
+                const harga = new Intl.NumberFormat('id-ID').format(v.harga_per_hari);
+                const isAvail = v.is_available === true || v.is_available === "true";
+                
+                list.innerHTML += `
+                    <div class="p-4 border border-gray-200 rounded-2xl bg-white shadow-sm flex items-center justify-between gap-4">
+                        <div class="flex items-center gap-3">
+                            <img src="${v.foto_url || 'https://placehold.co/100'}" class="w-12 h-12 rounded-lg object-cover border border-gray-100">
+                            <div>
+                                <h3 class="font-bold text-sm leading-tight">${v.nama_kendaraan}</h3>
+                                <p class="text-xs text-gray-500 mt-0.5">Rp${harga}/hari</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <div class="w-3 h-3 rounded-full ${isAvail ? 'bg-green-500' : 'bg-red-500'}"></div>
+                            <button onclick="alert('Nanti ini buka Form Edit untuk ${v.nama_kendaraan}')" class="p-2 bg-gray-50 hover:bg-gray-100 rounded-full transition-colors border border-gray-200">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-600"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+        }
     </script>
+</body>
+</html>
