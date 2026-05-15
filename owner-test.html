@@ -197,7 +197,7 @@
 
             globalVehicles.forEach(v => {
                 const harga = new Intl.NumberFormat('id-ID').format(v.harga_per_hari || 0);
-                const isAvail = v.is_available === true || String(v.is_available).toLowerCase() === "true";
+                const isAvail = v.is_available === true || String(v.is_available).toLowerCase() === "true" || String(v.is_available) === "1";
                 
                 list.innerHTML += `
                     <div class="p-4 border border-gray-200 rounded-2xl bg-white shadow-sm flex items-center justify-between gap-4 transition-all hover:border-gray-300 ${!isAvail ? 'bg-gray-50' : ''}">
@@ -249,7 +249,7 @@
             document.getElementById('e-image').value = vehicle.foto_url || '';
             
             // Atur status dropdown
-            const isAvail = vehicle.is_available === true || String(vehicle.is_available).toLowerCase() === "true";
+            const isAvail = vehicle.is_available === true || String(vehicle.is_available).toLowerCase() === "true" || String(vehicle.is_available) === "1";
             document.getElementById('e-status').value = isAvail ? "true" : "false";
 
             toggleModal('edit-modal', true);
