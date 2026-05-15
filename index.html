@@ -203,7 +203,7 @@
         }
 
         // ==========================================
-        // 1. LOGIC AUTH (DEV LOGIN) - ANTI NYANGKUT
+        // 1. LOGIC AUTH (DEV LOGIN) - BULLETPROOF
         // ==========================================
         async function handleLogin(e) {
             e.preventDefault();
@@ -215,7 +215,7 @@
 
             const originalBtn = btn.innerHTML;
             btn.innerHTML = `<svg class="animate-spin h-5 w-5 text-white" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>`;
-            btn.disabled = true; // Kunci tombol biar gak double click
+            btn.disabled = true; 
             err.classList.add('hidden');
 
             try {
@@ -226,12 +226,14 @@
                 });
                 
                 const rawData = await response.json();
-                console.log("Raw Response N8N:", rawData); // Buat mantau di Inspect Element
+                console.log("Raw Response N8N:", rawData);
                 
-                // JURUS ANTI NYANGKUT: Otomatis ekstrak Object dari dalam Array (Last Node behavior)
-                const resData = Array.isArray(rawData) ? rawData[0] : rawData;
+                // JURUS ANTI NYANGKUT: Ekstrak data walau n8n ngebungkus pake Array atau 'json'
+                let resData = Array.isArray(rawData) ? rawData[0] : rawData;
+                if (resData && resData.json) {
+                    resData = resData.json; 
+                }
                 
-                // Pengecekan data yang aman
                 if(resData && resData.status === 'success' && resData.data && resData.data.tenant) {
                     activeTenantId = input;
                     globalTenant = resData.data.tenant;
@@ -243,15 +245,15 @@
                     
                     switchView('view-role');
                 } else {
-                    throw new Error("Tenant tidak ditemukan (Data Kosong).");
+                    throw new Error(resData?.message || "Data Tenant kosong dari N8N.");
                 }
             } catch (error) {
                 console.error("Login Error:", error);
-                err.innerText = "Gagal memuat: " + error.message;
+                err.innerText = error.message;
                 err.classList.remove('hidden');
             } finally {
                 btn.innerHTML = originalBtn;
-                btn.disabled = false; // Buka kunci tombol
+                btn.disabled = false; 
             }
         }
 
@@ -259,7 +261,7 @@
         // 2. LOGIC CUSTOMER VIEW & FORM
         // ==========================================
         function setupCustomerView() {
-            document.getElementById('cust-logo').src = globalTenant.logo_url || `https://ui-avatars.com/api/?name=${globalTenant.nama_rental}&background=f3f4f6`;
+            document.getElementById('cust-logo').src = globalTenant.logo_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(globalTenant.nama_rental)}&background=f3f4f6`;
             document.getElementById('cust-title').innerText = globalTenant.nama_rental;
             document.getElementById('cust-bio').innerText = globalTenant.bio_deskripsi || 'Sewa kendaraan terpercaya.';
             
@@ -273,7 +275,7 @@
 
             globalVehicles.forEach(v => {
                 const harga = new Intl.NumberFormat('id-ID').format(v.harga_per_hari);
-                const isAvail = v.is_available === true || v.is_available === "true";
+                const isAvail = v.is_available === true || String(v.is_available).toLowerCase() === "true";
                 
                 list.innerHTML += `
                     <div onclick="${isAvail ? `openBookingForm('${v.vehicle_id}')` : ''}" class="p-3 flex gap-4 border border-gray-200 rounded-2xl bg-white shadow-sm transition-all active:scale-[0.98] ${!isAvail ? 'opacity-50 grayscale' : 'cursor-pointer hover:border-gray-300'}">
@@ -378,10 +380,7 @@
                 });
                 
                 const rawRes = await response.json();
-                const res = Array.isArray(rawRes) ? rawRes[0] : rawRes; // Pake jurus Array extract lagi
-                
-                // Buat bypass sementara kalau lu belum rapiin output insert_book di n8n
-                // Kita asumsi sukses kalo ga error fetch
+                console.log("Respon Booking:", rawRes);
                 
                 let noWaOwner = globalTenant.no_wa_owner || "08123456789";
                 if(noWaOwner.startsWith('0')) noWaOwner = '62' + noWaOwner.substring(1);
@@ -419,7 +418,7 @@
 
             globalVehicles.forEach(v => {
                 const harga = new Intl.NumberFormat('id-ID').format(v.harga_per_hari);
-                const isAvail = v.is_available === true || v.is_available === "true";
+                const isAvail = v.is_available === true || String(v.is_available).toLowerCase() === "true";
                 
                 list.innerHTML += `
                     <div class="p-4 border border-gray-200 rounded-2xl bg-white shadow-sm flex items-center justify-between gap-4">
