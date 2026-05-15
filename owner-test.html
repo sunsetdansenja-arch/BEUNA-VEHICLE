@@ -22,6 +22,7 @@
     <style>
         ::-webkit-scrollbar { display: none; }
         body { -ms-overflow-style: none; scrollbar-width: none; background-color: #f5f5f7; }
+        .optimistic-spin { animation: spin 1s linear infinite; }
     </style>
 </head>
 <body class="text-gray-900 antialiased min-h-screen">
@@ -35,11 +36,21 @@
         </header>
 
         <main class="p-5 pb-24">
-            <div class="flex items-center justify-between mb-6">
+            <div class="flex items-center justify-between mb-4">
                 <h2 class="text-xl font-bold tracking-tight">Garasi Anda</h2>
                 <button onclick="toggleModal('add-modal', true)" class="bg-black text-white text-xs font-bold px-4 py-2 rounded-full active:scale-95 transition-all shadow-sm">
                     + Tambah
                 </button>
+            </div>
+
+            <div class="mb-5 flex gap-2">
+                <select id="filter-armada" onchange="renderVehicles()" class="bg-white border border-gray-200 text-gray-700 text-xs font-bold py-2 px-3 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-brand">
+                    <option value="Semua">🏢 Semua Armada</option>
+                    <option value="Motor">🏍️ Khusus Motor</option>
+                    <option value="Mobil">🚗 Khusus Mobil</option>
+                </select>
+                <div id="stats-badge" class="flex items-center bg-brand/10 text-brand text-[11px] font-bold px-3 rounded-xl border border-brand/20">
+                    </div>
             </div>
 
             <div id="loading-indicator" class="text-center py-12">
@@ -56,7 +67,7 @@
             <div class="bg-white w-full max-w-md rounded-t-3xl sm:rounded-3xl p-6 shadow-2xl relative transform transition-transform translate-y-full sm:translate-y-0" id="add-modal-content">
                 
                 <div class="flex items-center justify-between mb-6">
-                    <h2 class="text-xl font-bold tracking-tight">Tambah Motor Baru</h2>
+                    <h2 class="text-xl font-bold tracking-tight">Tambah Armada</h2>
                     <button type="button" onclick="toggleModal('add-modal', false)" class="p-2 bg-gray-100 rounded-full active:scale-90 transition-transform">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
                     </button>
@@ -64,22 +75,32 @@
 
                 <form id="add-vehicle-form" onsubmit="submitVehicle(event, 'insert')" class="space-y-4">
                     <div>
-                        <label class="block text-xs font-medium text-gray-500 mb-1">Nama Kendaraan</label>
-                        <input type="text" id="v-name" required placeholder="Contoh: Honda Vario 160" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand focus:bg-white transition-all">
+                        <label class="block text-xs font-bold text-gray-500 mb-1">Nama Armada</label>
+                        <input type="text" id="v-name" required placeholder="Contoh: Honda Brio / Vario 160" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand focus:bg-white font-medium">
                     </div>
                     <div class="grid grid-cols-2 gap-3">
                         <div>
-                            <label class="block text-xs font-medium text-gray-500 mb-1">Tipe</label>
-                            <input type="text" id="v-type" required placeholder="Matic / Manual" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand focus:bg-white transition-all">
+                            <label class="block text-xs font-bold text-gray-500 mb-1">Kategori</label>
+                            <select id="v-category" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand focus:bg-white font-medium">
+                                <option value="Motor">🏍️ Motor</option>
+                                <option value="Mobil">🚗 Mobil</option>
+                            </select>
                         </div>
                         <div>
-                            <label class="block text-xs font-medium text-gray-500 mb-1">Harga/Hari</label>
-                            <input type="number" id="v-price" required placeholder="100000" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand focus:bg-white transition-all">
+                            <label class="block text-xs font-bold text-gray-500 mb-1">Transmisi</label>
+                            <select id="v-transmission" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand focus:bg-white font-medium">
+                                <option value="Matic">Matic</option>
+                                <option value="Manual">Manual</option>
+                            </select>
                         </div>
                     </div>
                     <div>
-                        <label class="block text-xs font-medium text-gray-500 mb-1">URL Foto (Opsional)</label>
-                        <input type="url" id="v-image" placeholder="https://..." class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand focus:bg-white transition-all">
+                        <label class="block text-xs font-bold text-gray-500 mb-1">Harga Sewa / Hari</label>
+                        <input type="number" id="v-price" required placeholder="100000" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand focus:bg-white font-medium">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 mb-1">URL Foto (Opsional)</label>
+                        <input type="url" id="v-image" placeholder="https://..." class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand focus:bg-white font-medium">
                     </div>
 
                     <button type="submit" id="btn-submit-add" class="w-full bg-black text-white font-bold py-4 rounded-xl shadow-md active:scale-95 transition-all mt-4 flex justify-center items-center gap-2">
@@ -93,42 +114,46 @@
             <div class="bg-white w-full max-w-md rounded-t-3xl sm:rounded-3xl p-6 shadow-2xl relative transform transition-transform translate-y-full sm:translate-y-0" id="edit-modal-content">
                 
                 <div class="flex items-center justify-between mb-6">
-                    <h2 class="text-xl font-bold tracking-tight">Edit Motor</h2>
+                    <h2 class="text-xl font-bold tracking-tight">Edit Armada</h2>
                     <button type="button" onclick="toggleModal('edit-modal', false)" class="p-2 bg-gray-100 rounded-full active:scale-90 transition-transform">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
                     </button>
                 </div>
 
                 <form id="edit-vehicle-form" onsubmit="submitVehicle(event, 'update')" class="space-y-4">
-                    <input type="hidden" id="e-id"> <div>
-                        <label class="block text-xs font-medium text-gray-500 mb-1">Status Ketersediaan</label>
-                        <select id="e-status" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand focus:bg-white transition-all font-bold">
-                            <option value="true">🟢 Tersedia (Bisa Disewa)</option>
-                            <option value="false">🔴 Sedang Disewa / Rusak</option>
-                        </select>
-                    </div>
-
+                    <input type="hidden" id="e-id"> 
+                    
                     <div>
-                        <label class="block text-xs font-medium text-gray-500 mb-1">Nama Kendaraan</label>
-                        <input type="text" id="e-name" required class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand focus:bg-white transition-all">
+                        <label class="block text-xs font-bold text-gray-500 mb-1">Nama Armada</label>
+                        <input type="text" id="e-name" required class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand focus:bg-white font-medium">
                     </div>
                     <div class="grid grid-cols-2 gap-3">
                         <div>
-                            <label class="block text-xs font-medium text-gray-500 mb-1">Tipe</label>
-                            <input type="text" id="e-type" required class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand focus:bg-white transition-all">
+                            <label class="block text-xs font-bold text-gray-500 mb-1">Kategori</label>
+                            <select id="e-category" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand focus:bg-white font-medium">
+                                <option value="Motor">🏍️ Motor</option>
+                                <option value="Mobil">🚗 Mobil</option>
+                            </select>
                         </div>
                         <div>
-                            <label class="block text-xs font-medium text-gray-500 mb-1">Harga/Hari</label>
-                            <input type="number" id="e-price" required class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand focus:bg-white transition-all">
+                            <label class="block text-xs font-bold text-gray-500 mb-1">Transmisi</label>
+                            <select id="e-transmission" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand focus:bg-white font-medium">
+                                <option value="Matic">Matic</option>
+                                <option value="Manual">Manual</option>
+                            </select>
                         </div>
                     </div>
                     <div>
-                        <label class="block text-xs font-medium text-gray-500 mb-1">URL Foto</label>
-                        <input type="url" id="e-image" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand focus:bg-white transition-all">
+                        <label class="block text-xs font-bold text-gray-500 mb-1">Harga Sewa / Hari</label>
+                        <input type="number" id="e-price" required class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand focus:bg-white font-medium">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 mb-1">URL Foto</label>
+                        <input type="url" id="e-image" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand focus:bg-white font-medium">
                     </div>
 
                     <button type="submit" id="btn-submit-edit" class="w-full bg-brand text-white font-bold py-4 rounded-xl shadow-md shadow-brand/30 active:scale-95 transition-all mt-4 flex justify-center items-center gap-2">
-                        Update Data
+                        Update Data Armada
                     </button>
                 </form>
             </div>
@@ -142,7 +167,7 @@
 
         let globalVehicles = [];
 
-        // 1. TARIK DATA (Waktu halaman dibuka)
+        // 1. INIT LOAD
         window.onload = async function loadDashboard() {
             const loading = document.getElementById('loading-indicator');
             const list = document.getElementById('owner-vehicle-list');
@@ -151,7 +176,6 @@
 
             loading.classList.remove('hidden');
             list.classList.add('hidden');
-            errorMsg.classList.add('hidden');
 
             try {
                 const response = await fetch(WEBHOOK_URL, {
@@ -174,44 +198,71 @@
                     loading.classList.add('hidden');
                     list.classList.remove('hidden');
                 } else {
-                    throw new Error("Respon gagal atau struktur JSON salah.");
+                    throw new Error("Respon server gagal.");
                 }
-
             } catch (error) {
                 loading.classList.add('hidden');
                 errorMsg.innerText = "Gagal memuat: " + error.message;
                 errorMsg.classList.remove('hidden');
-                tenantName.innerText = "Error";
             }
         };
 
-        // 2. RENDER HTML LIST MOTOR
+        // 2. RENDER HTML LIST ARMADA (DENGAN FILTER)
         function renderVehicles() {
             const list = document.getElementById('owner-vehicle-list');
+            const filterValue = document.getElementById('filter-armada').value;
             list.innerHTML = '';
             
-            if(globalVehicles.length === 0) {
-                list.innerHTML = `<p class="text-sm text-gray-400 text-center py-8 border border-dashed border-gray-300 rounded-2xl bg-gray-50">Garasi masih kosong.<br>Klik tombol + Tambah di atas.</p>`;
+            // Logika Filter Data di Browser (Cepat banget)
+            let filteredVehicles = globalVehicles;
+            if (filterValue !== 'Semua') {
+                filteredVehicles = globalVehicles.filter(v => {
+                    const tipeStr = (v.tipe_kendaraan || "").toLowerCase();
+                    return tipeStr.includes(filterValue.toLowerCase());
+                });
+            }
+            
+            // Update Mini Stats
+            const totalAvail = filteredVehicles.filter(v => v.is_available === true || String(v.is_available).toLowerCase() === "true" || String(v.is_available) === "1").length;
+            document.getElementById('stats-badge').innerText = `${totalAvail} Ready dari ${filteredVehicles.length} Unit`;
+
+            if(filteredVehicles.length === 0) {
+                list.innerHTML = `<p class="text-sm text-gray-400 text-center py-8 border border-dashed border-gray-300 rounded-2xl bg-gray-50">Tidak ada armada ditemukan di kategori ini.</p>`;
                 return;
             }
 
-            globalVehicles.forEach(v => {
+            filteredVehicles.forEach(v => {
                 const harga = new Intl.NumberFormat('id-ID').format(v.harga_per_hari || 0);
                 const isAvail = v.is_available === true || String(v.is_available).toLowerCase() === "true" || String(v.is_available) === "1";
                 
+                // Parsing Tipe Kendaraan (Biar UI Cantik)
+                const tipeStr = v.tipe_kendaraan || "";
+                const isMobil = tipeStr.toLowerCase().includes('mobil');
+                const catIcon = isMobil ? '🚗' : '🏍️';
+                
                 list.innerHTML += `
-                    <div class="p-4 border border-gray-200 rounded-2xl bg-white shadow-sm flex items-center justify-between gap-4 transition-all hover:border-gray-300 ${!isAvail ? 'bg-gray-50' : ''}">
-                        <div class="flex items-center gap-3">
-                            <img src="${v.foto_url || 'https://placehold.co/100?text=Motor'}" class="w-12 h-12 rounded-lg object-cover border border-gray-100 ${!isAvail ? 'grayscale' : 'bg-gray-50'}">
-                            <div>
-                                <h3 class="font-bold text-[15px] leading-tight ${!isAvail ? 'text-gray-500' : 'text-gray-900'}">${v.nama_kendaraan || 'Tanpa Nama'}</h3>
-                                <p class="text-xs ${!isAvail ? 'text-gray-400' : 'text-brand font-bold'} mt-0.5">Rp${harga}<span class="text-gray-400 font-medium">/hari</span></p>
-                            </div>
+                    <div class="p-4 border border-gray-200 rounded-2xl bg-white shadow-sm flex items-center gap-4 transition-all ${!isAvail ? 'bg-gray-50' : ''}">
+                        
+                        <div class="w-[60px] h-[60px] rounded-xl overflow-hidden shrink-0 border border-gray-100 ${!isAvail ? 'grayscale opacity-70' : 'bg-gray-50'}">
+                            <img src="${v.foto_url || 'https://placehold.co/100?text=Unit'}" class="w-full h-full object-cover">
                         </div>
-                        <div class="flex items-center gap-3">
-                            <div class="w-2.5 h-2.5 rounded-full ${isAvail ? 'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.5)]' : 'bg-red-500'}"></div>
-                            <button onclick="openEditModal('${v.vehicle_id}')" class="p-2 bg-gray-50 hover:bg-gray-200 rounded-full transition-colors border border-gray-200 active:scale-90 text-gray-600">
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>
+                        
+                        <div class="flex-1">
+                            <div class="flex items-center gap-2 mb-1">
+                                <h3 class="font-bold text-[15px] leading-tight ${!isAvail ? 'text-gray-500' : 'text-gray-900'}">${v.nama_kendaraan || 'Tanpa Nama'}</h3>
+                            </div>
+                            <div class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">${catIcon} ${tipeStr}</div>
+                            <p class="text-[13px] ${!isAvail ? 'text-gray-400' : 'text-brand font-bold'}">Rp${harga}<span class="text-gray-400 font-medium text-[10px]">/hari</span></p>
+                        </div>
+                        
+                        <div class="flex flex-col gap-2 shrink-0 items-end">
+                            
+                            <button id="toggle-btn-${v.vehicle_id}" onclick="quickToggleStatus('${v.vehicle_id}')" class="px-3 py-1.5 rounded-lg text-[10px] font-bold transition-all active:scale-95 flex items-center justify-center min-w-[75px] ${isAvail ? 'bg-green-50 text-green-600 border border-green-200' : 'bg-gray-200 text-gray-500 border border-gray-200'}">
+                                ${isAvail ? '🟢 Tersedia' : '🔴 Disewa'}
+                            </button>
+                            
+                            <button onclick="openEditModal('${v.vehicle_id}')" class="text-[11px] text-gray-500 font-bold px-2 py-1 rounded hover:bg-gray-100 active:scale-90 transition-colors flex items-center gap-1">
+                                ✏️ Edit Data
                             </button>
                         </div>
                     </div>
@@ -219,7 +270,53 @@
             });
         }
 
-        // 3. FUNGSI BUKA TUTUP MODAL
+        // 3. JURUS QUICK TOGGLE STATUS (Optimistic UI)
+        async function quickToggleStatus(vehicleId) {
+            const v = globalVehicles.find(x => x.vehicle_id === vehicleId);
+            if(!v) return;
+
+            const isCurrentlyAvail = v.is_available === true || String(v.is_available) === "1" || String(v.is_available).toLowerCase() === "true";
+            const newStatus = !isCurrentlyAvail;
+            
+            const btn = document.getElementById(`toggle-btn-${vehicleId}`);
+            const originalContent = btn.innerHTML;
+            
+            // 1. Ubah UI Button langsung jadi Loading biar terasa instan
+            btn.innerHTML = `<svg class="animate-spin h-3 w-3 text-current" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>`;
+            btn.disabled = true;
+
+            // 2. Rakit Payload buat N8N
+            const payload = {
+                action: 'update_vehicle',
+                tenant_id: HARDCODED_SUBDOMAIN,
+                vehicle_id: v.vehicle_id,
+                nama_kendaraan: v.nama_kendaraan,
+                tipe_kendaraan: v.tipe_kendaraan,
+                harga_per_hari: v.harga_per_hari,
+                foto_url: v.foto_url,
+                is_available: newStatus // Kirim status kebalikannya
+            };
+
+            try {
+                // Tembak n8n
+                await fetch(WEBHOOK_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                // 3. Update memory lokal & render ulang list-nya
+                v.is_available = newStatus;
+                renderVehicles();
+
+            } catch (error) {
+                alert("Gagal update status. Periksa internet Anda.");
+                btn.innerHTML = originalContent;
+                btn.disabled = false;
+            }
+        }
+
+        // 4. FUNGSI MODAL
         function toggleModal(modalId, show) {
             const modal = document.getElementById(modalId);
             const content = document.getElementById(modalId + '-content');
@@ -236,26 +333,34 @@
             }
         }
 
-        // 4. SIAPIN DATA KE FORM EDIT
+        // 5. ISI DATA KE FORM EDIT
         function openEditModal(vehicleId) {
             const vehicle = globalVehicles.find(v => v.vehicle_id === vehicleId);
             if (!vehicle) return;
 
-            // Suntik data lama ke input box
             document.getElementById('e-id').value = vehicle.vehicle_id;
             document.getElementById('e-name').value = vehicle.nama_kendaraan || '';
-            document.getElementById('e-type').value = vehicle.tipe_kendaraan || '';
             document.getElementById('e-price').value = vehicle.harga_per_hari || '';
             document.getElementById('e-image').value = vehicle.foto_url || '';
             
-            // Atur status dropdown
-            const isAvail = vehicle.is_available === true || String(vehicle.is_available).toLowerCase() === "true" || String(vehicle.is_available) === "1";
-            document.getElementById('e-status').value = isAvail ? "true" : "false";
+            // Ekstrak Tipe Kendaraan (misal "Motor - Matic") untuk memisahkan dropdown
+            const rawType = vehicle.tipe_kendaraan || "";
+            if (rawType.toLowerCase().includes('mobil')) {
+                document.getElementById('e-category').value = 'Mobil';
+            } else {
+                document.getElementById('e-category').value = 'Motor';
+            }
+
+            if (rawType.toLowerCase().includes('manual')) {
+                document.getElementById('e-transmission').value = 'Manual';
+            } else {
+                document.getElementById('e-transmission').value = 'Matic';
+            }
 
             toggleModal('edit-modal', true);
         }
 
-        // 5. EKSEKUSI INSERT & UPDATE N8N (Satu fungsi buat dua keperluan)
+        // 6. SUBMIT FORM (ADD & EDIT) KE N8N
         async function submitVehicle(e, actionType) {
             e.preventDefault();
             
@@ -268,15 +373,30 @@
             btn.disabled = true;
 
             const prefix = isUpdate ? 'e-' : 'v-';
+            
+            // TRIK JENIUS: Gabungin nilai Dropdown Kategori dan Transmisi
+            const cat = document.getElementById(prefix + 'category').value;
+            const trans = document.getElementById(prefix + 'transmission').value;
+            const combinedType = `${cat} - ${trans}`;
+
+            // Kalau update, ambil nilai ketersediaan asli, kalau add, default true.
+            let availVal = true;
+            if (isUpdate) {
+                const existingV = globalVehicles.find(x => x.vehicle_id === document.getElementById('e-id').value);
+                if(existingV) {
+                    availVal = existingV.is_available === true || String(existingV.is_available).toLowerCase() === "true" || String(existingV.is_available) === "1";
+                }
+            }
+
             const payload = {
                 action: isUpdate ? 'update_vehicle' : 'insert_vehicle',
                 tenant_id: HARDCODED_SUBDOMAIN,
                 vehicle_id: isUpdate ? document.getElementById('e-id').value : 'VHC-' + Date.now(),
                 nama_kendaraan: document.getElementById(prefix + 'name').value,
-                tipe_kendaraan: document.getElementById(prefix + 'type').value,
+                tipe_kendaraan: combinedType, // String yang udah digabung!
                 harga_per_hari: document.getElementById(prefix + 'price').value,
                 foto_url: document.getElementById(prefix + 'image').value,
-                is_available: isUpdate ? (document.getElementById('e-status').value === "true") : true
+                is_available: availVal
             };
 
             try {
@@ -287,7 +407,8 @@
                 });
 
                 toggleModal(isUpdate ? 'edit-modal' : 'add-modal', false);
-                setTimeout(() => { window.onload(); }, 500); // Auto-refresh data!
+                // Refresh data untuk narik record baru
+                setTimeout(() => { window.onload(); }, 500); 
 
             } catch (error) {
                 alert("Koneksi terputus. Gagal menyimpan.");
