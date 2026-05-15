@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Etalase | RentalinBy</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: '#FF5A00',
+                        'brand-hover': '#e04f00'
+                    },
+                    fontFamily: {
+                        sans: ['-apple-system', 'BlinkMacSystemFont', '"San Francisco"', '"Segoe UI"', 'Roboto', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        ::-webkit-scrollbar { display: none; }
+        body { -ms-overflow-style: none; scrollbar-width: none; background-color: #f5f5f7; }
+    </style>
+</head>
+<body class="text-gray-900 antialiased min-h-screen">
+
+    <div class="max-w-md mx-auto min-h-screen bg-white shadow-xl shadow-gray-200/50 border-x border-gray-100 relative overflow-hidden">
+        
+        <header class="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100 px-5 py-4 flex items-center gap-3">
+            <button id="btn-back" onclick="closeForm()" class="hidden p-2 -ml-2 rounded-full hover:bg-gray-100 transition-colors">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+            </button>
+            <div class="flex items-center gap-3">
+                <img id="cust-logo" src="https://placehold.co/100" class="w-9 h-9 rounded-full border border-gray-200 object-cover bg-gray-50 hidden">
+                <div>
+                    <h1 id="cust-title" class="font-bold text-[15px] tracking-tight leading-none">Loading...</h1>
+                    <p id="cust-bio" class="text-[11px] text-gray-500 mt-0.5 line-clamp-1">Menghubungkan ke server</p>
+                </div>
+            </div>
+        </header>
+
+        <div id="loading-indicator" class="text-center py-20">
+            <svg class="animate-spin h-8 w-8 text-brand mx-auto mb-3" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+            <p class="text-sm text-gray-500 font-medium">Memuat katalog kendaraan...</p>
+        </div>
+
+        <div id="error-message" class="hidden m-5 text-center py-6 text-red-500 bg-red-50 rounded-xl border border-red-100 text-sm font-medium"></div>
+
+        <main class="p-5 pb-24">
+            
+            <div id="catalog-section" class="hidden">
+                <div class="mb-5 flex justify-between items-end">
+                    <h2 class="text-2xl font-bold tracking-tight">Pilih Kendaraan</h2>
+                </div>
+                <div id="vehicle-list" class="space-y-4">
+                    </div>
+            </div>
+
+            <div id="form-section" class="hidden animation-fade-in">
+                
+                <div id="selected-vehicle-preview" class="mb-6 p-4 rounded-2xl bg-gray-50 border border-gray-100 flex gap-4 items-center shadow-sm">
+                    </div>
+                
+                <h2 class="text-xl font-bold mb-4 tracking-tight">Lengkapi Data Sewa</h2>
+                
+                <form id="booking-form" class="space-y-5" onsubmit="submitBooking(event)">
+                    <input type="hidden" id="form-vehicle-id">
+                    
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-medium text-gray-500 mb-1">Mulai Pakai</label>
+                            <input type="datetime-local" id="waktu_mulai" required class="w-full bg-white border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent transition-all">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-gray-500 mb-1">Selesai Pakai</label>
+                            <input type="datetime-local" id="waktu_selesai" required class="w-full bg-white border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent transition-all">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-medium text-gray-500 mb-1">Alamat Antar / Jemput</label>
+                        <textarea id="alamat_antar" rows="2" required placeholder="Contoh: Hotel Hermes, Kamar 102" class="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent transition-all"></textarea>
+                    </div>
+
+                    <div class="border-t border-gray-100 my-2"></div>
+                    <h2 class="text-lg font-bold mb-2 tracking-tight">Data Diri</h2>
+
+                    <div>
+                        <input type="text" id="nama_lengkap" required placeholder="Nama Lengkap (Sesuai KTP)" class="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent transition-all">
+                    </div>
+                    <div>
+                        <input type="tel" id="no_wa_customer" required placeholder="No. WhatsApp Aktif" class="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent transition-all">
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-3">
+                        <input type="text" id="akun_sosmed" required placeholder="Username IG/TikTok" class="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent transition-all">
+                        <input type="text" id="pekerjaan" required placeholder="Pekerjaan" class="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent transition-all">
+                    </div>
+
+                    <div>
+                        <input type="tel" id="no_darurat" required placeholder="No. Darurat (Keluarga/Teman)" class="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent transition-all">
+                    </div>
+
+                    <div class="flex items-center justify-between p-4 border border-gray-100 rounded-xl bg-gray-50 mt-4">
+                        <div class="text-sm font-medium text-gray-700">Jumlah Helm</div>
+                        <div class="flex items-center gap-3">
+                            <button type="button" onclick="ubahJumlah('helm', -1)" class="w-8 h-8 rounded-full bg-white border border-gray-200 flex items-center justify-center font-bold active:scale-90 transition-transform">-</button>
+                            <span id="jumlah_helm_display" class="font-bold w-4 text-center">2</span>
+                            <button type="button" onclick="ubahJumlah('helm', 1)" class="w-8 h-8 rounded-full bg-white border border-gray-200 flex items-center justify-center font-bold active:scale-90 transition-transform">+</button>
+                            <input type="hidden" id="jumlah_helm" value="2">
+                        </div>
+                    </div>
+
+                    <div class="fixed bottom-0 left-0 right-0 p-5 bg-white/90 backdrop-blur-md border-t border-gray-100 max-w-md mx-auto z-40">
+                        <button type="submit" id="btn-submit-booking" class="w-full bg-brand hover:bg-brand-hover text-white font-bold py-3.5 rounded-full shadow-lg shadow-orange-500/30 active:scale-95 transition-all flex justify-center items-center gap-2 text-[15px]">
+                            <span>Booking Sekarang via WA</span>
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+        </main>
+    </div>
+
+    <script>
+        const WEBHOOK_URL = 'https://n8n-mzbmiib3etk4.kangkung.sumopod.my.id/webhook/beuna-vr-api';
+        const HARDCODED_SUBDOMAIN = 'mototest'; // Tembakan utama testing
+
+        let globalTenant = {};
+        let globalVehicles = [];
+
+        // 1. OTOMATIS TARIK DATA SAAT WEB DIBUKA
+        window.onload = async function init() {
+            const loading = document.getElementById('loading-indicator');
+            const catalog = document.getElementById('catalog-section');
+            const errorMsg = document.getElementById('error-message');
+
+            try {
+                const response = await fetch(WEBHOOK_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'get', subdomain: HARDCODED_SUBDOMAIN })
+                });
+
+                const rawData = await response.json();
+                
+                // Ekstrak data dari n8n
+                let resData = Array.isArray(rawData) ? rawData[0] : rawData;
+                if (resData && resData.json) resData = resData.json;
+
+                if (resData && resData.status === 'success') {
+                    globalTenant = resData.data.tenant || {};
+                    globalVehicles = resData.data.vehicles || [];
+
+                    // Render Header Profile
+                    document.getElementById('cust-title').innerText = globalTenant.nama_rental || HARDCODED_SUBDOMAIN;
+                    document.getElementById('cust-bio').innerText = globalTenant.bio_deskripsi || 'Sewa kendaraan terpercaya & termurah.';
+                    
+                    const logoEl = document.getElementById('cust-logo');
+                    logoEl.src = globalTenant.logo_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(globalTenant.nama_rental)}&background=FF5A00&color=fff`;
+                    logoEl.classList.remove('hidden');
+
+                    // Render Katalog Motor
+                    renderCatalog();
+
+                    // Sembunyikan loading, Tampilkan Katalog
+                    loading.classList.add('hidden');
+                    catalog.classList.remove('hidden');
+                } else {
+                    throw new Error("Gagal mengambil data katalog rental.");
+                }
+            } catch (error) {
+                loading.classList.add('hidden');
+                errorMsg.innerText = error.message;
+                errorMsg.classList.remove('hidden');
+                document.getElementById('cust-title').innerText = "Oops! Error";
+                document.getElementById('cust-bio').innerText = "Gagal terhubung ke server.";
+            }
+        };
+
+        // 2. RENDER LIST MOTOR DI ETALASE
+        function renderCatalog() {
+            const list = document.getElementById('vehicle-list');
+            list.innerHTML = '';
+            
+            if(globalVehicles.length === 0) {
+                list.innerHTML = `<p class="text-sm text-gray-400 text-center py-10 border border-dashed border-gray-200 rounded-2xl bg-gray-50">Maaf, unit sedang kosong.</p>`;
+                return;
+            }
+
+            globalVehicles.forEach(v => {
+                const harga = new Intl.NumberFormat('id-ID').format(v.harga_per_hari || 0);
+                const isAvail = v.is_available === true || String(v.is_available).toLowerCase() === "true";
+                
+                list.innerHTML += `
+                    <div onclick="${isAvail ? `openForm('${v.vehicle_id}')` : ''}" class="p-3 flex gap-4 border border-gray-200 rounded-2xl bg-white shadow-sm transition-all active:scale-[0.98] ${!isAvail ? 'opacity-50 grayscale' : 'cursor-pointer hover:border-gray-300'}">
+                        <div class="w-[100px] h-[100px] rounded-[10px] overflow-hidden shrink-0 bg-gray-100 border border-gray-100">
+                            <img src="${v.foto_url || 'https://placehold.co/200x200?text=Sewa'}" class="w-full h-full object-cover">
+                        </div>
+                        <div class="flex-1 flex flex-col justify-between py-1 pr-1">
+                            <div>
+                                <h3 class="font-bold text-[15px] leading-tight line-clamp-2 text-gray-900">${v.nama_kendaraan || 'Kendaraan'}</h3>
+                                <p class="text-brand font-bold text-sm mt-1">Rp${harga}<span class="text-[10px] text-gray-400 font-normal">/hari</span></p>
+                            </div>
+                            <div class="mt-2">
+                                ${isAvail 
+                                    ? `<button class="text-[11px] font-bold bg-black text-white px-4 py-1.5 rounded-full inline-flex items-center gap-1 shadow-sm">Pilih Unit</button>` 
+                                    : `<span class="text-[11px] font-semibold bg-gray-100 text-gray-500 px-3 py-1 rounded-full">Unit Disewa</span>`
+                                }
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        // 3. NAVIGASI FORM BOOKING
+        function openForm(id) {
+            const vehicle = globalVehicles.find(v => v.vehicle_id === id);
+            if(!vehicle) return;
+
+            document.getElementById('form-vehicle-id').value = vehicle.vehicle_id;
+            
+            const harga = new Intl.NumberFormat('id-ID').format(vehicle.harga_per_hari);
+            document.getElementById('selected-vehicle-preview').innerHTML = `
+                <img src="${vehicle.foto_url || 'https://placehold.co/100'}" class="w-14 h-14 rounded-xl object-cover border border-gray-200 bg-white">
+                <div>
+                    <div class="text-[10px] text-gray-400 font-bold uppercase tracking-wider mb-0.5">Pilihan Anda</div>
+                    <div class="font-bold text-[15px] leading-tight text-gray-900">${vehicle.nama_kendaraan}</div>
+                    <div class="font-bold text-brand text-xs mt-1">Rp${harga}<span class="text-gray-400 font-normal">/hari</span></div>
+                </div>
+            `;
+
+            document.getElementById('catalog-section').classList.add('hidden');
+            document.getElementById('form-section').classList.remove('hidden');
+            document.getElementById('btn-back').classList.remove('hidden');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function closeForm() {
+            document.getElementById('form-section').classList.add('hidden');
+            document.getElementById('catalog-section').classList.remove('hidden');
+            document.getElementById('btn-back').classList.add('hidden');
+            window.scrollTo({ top: 0 });
+        }
+
+        function ubahJumlah(tipe, nilai) {
+            const input = document.getElementById(`jumlah_${tipe}`);
+            const display = document.getElementById(`jumlah_${tipe}_display`);
+            let current = parseInt(input.value) || 0;
+            let newVal = current + nilai;
+            if (newVal < 0) newVal = 0; 
+            input.value = newVal;
+            display.innerText = newVal;
+        }
+
+        // 4. KIRIM DATA KE N8N & REDIRECT KE WHATSAPP
+        async function submitBooking(e) {
+            e.preventDefault();
+            const btn = document.getElementById('btn-submit-booking');
+            const originalBtnText = btn.innerHTML;
+            
+            btn.innerHTML = `<svg class="animate-spin -ml-1 mr-2 h-5 w-5 text-white inline" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> <span>Menghubungkan...</span>`;
+            btn.disabled = true;
+
+            const payload = {
+                action: 'insert_book',
+                tenant_id: HARDCODED_SUBDOMAIN,
+                vehicle_id: document.getElementById('form-vehicle-id').value,
+                booking_id: 'BK-' + Date.now(),
+                waktu_mulai: document.getElementById('waktu_mulai').value,
+                waktu_selesai: document.getElementById('waktu_selesai').value,
+                alamat_antar: document.getElementById('alamat_antar').value,
+                nama_lengkap: document.getElementById('nama_lengkap').value,
+                no_wa_customer: document.getElementById('no_wa_customer').value,
+                akun_sosmed: document.getElementById('akun_sosmed').value,
+                pekerjaan: document.getElementById('pekerjaan').value,
+                no_darurat: document.getElementById('no_darurat').value,
+                jumlah_helm: document.getElementById('jumlah_helm').value,
+                alamat_jemput: document.getElementById('alamat_antar').value, // Disamakan dengan antar
+                jumlah_jashujan: 1, 
+                dokumen_jaminan: 'KTP (Kirim via WA)',
+                tujuan_penggunaan: 'Sewa Reguler'
+            };
+
+            try {
+                // Tembak Data ke Webhook (Jalur insert_book)
+                await fetch(WEBHOOK_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                
+                // Format nomor WA Owner (Misal: 0812 -> 62812)
+                let noWaOwner = globalTenant.no_wa_owner || "08123456789";
+                if(noWaOwner.startsWith('0')) noWaOwner = '62' + noWaOwner.substring(1);
+                
+                const vehicleName = globalVehicles.find(v => v.vehicle_id === payload.vehicle_id)?.nama_kendaraan || "Kendaraan";
+                
+                // Rakit Pesan Teks WhatsApp
+                const waText = `Halo admin *${globalTenant.nama_rental}*, saya mau sewa unit ini:\n\n` +
+                               `🏍️ *Unit:* ${vehicleName}\n` +
+                               `📅 *Mulai:* ${payload.waktu_mulai.replace('T', ' ')}\n` +
+                               `📅 *Selesai:* ${payload.waktu_selesai.replace('T', ' ')}\n` +
+                               `📍 *Alamat Antar:* ${payload.alamat_antar}\n\n` +
+                               `Data diri (Nama: ${payload.nama_lengkap}) sudah saya isi di sistem web. Mohon konfirmasinya ya min!`;
+
+                // Arahkan ke WhatsApp
+                window.location.href = `https://wa.me/${noWaOwner}?text=${encodeURIComponent(waText)}`;
+
+            } catch (error) {
+                alert("Gagal memproses booking. Coba periksa koneksi internet Anda.");
+                btn.innerHTML = originalBtnText;
+                btn.disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>
