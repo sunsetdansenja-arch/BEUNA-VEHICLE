@@ -194,7 +194,7 @@
 
             globalVehicles.forEach(v => {
                 const harga = new Intl.NumberFormat('id-ID').format(v.harga_per_hari || 0);
-                const isAvail = v.is_available === true || String(v.is_available).toLowerCase() === "true";
+                const isAvail = v.is_available === true || String(v.is_available).toLowerCase() === "true" || String(v.is_available) === "1";
                 
                 list.innerHTML += `
                     <div onclick="${isAvail ? `openForm('${v.vehicle_id}')` : ''}" class="p-3 flex gap-4 border border-gray-200 rounded-2xl bg-white shadow-sm transition-all active:scale-[0.98] ${!isAvail ? 'opacity-50 grayscale' : 'cursor-pointer hover:border-gray-300'}">
