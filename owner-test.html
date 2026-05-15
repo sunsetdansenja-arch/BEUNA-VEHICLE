@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Owner Dashboard | RentalinBy</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: '#FF5A00'
+                    },
+                    fontFamily: {
+                        sans: ['-apple-system', 'BlinkMacSystemFont', '"San Francisco"', '"Segoe UI"', 'Roboto', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        ::-webkit-scrollbar { display: none; }
+        body { -ms-overflow-style: none; scrollbar-width: none; background-color: #f5f5f7; }
+    </style>
+</head>
+<body class="text-gray-900 antialiased min-h-screen">
+
+    <div class="max-w-md mx-auto min-h-screen bg-gray-50 shadow-xl shadow-gray-200/50 border-x border-gray-100 relative">
+        
+        <header class="sticky top-0 z-50 bg-white border-b border-gray-200 px-5 py-4 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <span class="font-bold text-[15px] tracking-tight">Dashboard Owner (<span id="tenant-name-display" class="text-brand">Loading...</span>)</span>
+            </div>
+        </header>
+
+        <main class="p-5">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-xl font-bold tracking-tight">Garasi Anda</h2>
+                <button onclick="alert('Nanti ini buka pop-up tambah motor')" class="bg-black text-white text-xs font-bold px-4 py-2 rounded-full active:scale-95 transition-all shadow-sm">
+                    + Tambah
+                </button>
+            </div>
+
+            <div id="loading-indicator" class="text-center py-12">
+                <svg class="animate-spin h-8 w-8 text-gray-400 mx-auto mb-3" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                <p class="text-sm text-gray-500 font-medium">Menarik data dari n8n...</p>
+            </div>
+
+            <div id="error-message" class="hidden text-center py-6 text-red-500 bg-red-50 rounded-xl border border-red-100 mb-4 text-sm font-medium"></div>
+
+            <div id="owner-vehicle-list" class="space-y-3 hidden">
+                </div>
+        </main>
+
+    </div>
+
+    <script>
+        const WEBHOOK_URL = 'https://n8n-mzbmiib3etk4.kangkung.sumopod.my.id/webhook/beuna-vr-api';
+        const HARDCODED_SUBDOMAIN = 'mototest'; // Langsung tembak ke mototest
+
+        let globalVehicles = [];
+
+        // Langsung jalankan fungsi ini pas file HTML dibuka
+        window.onload = async function loadDashboard() {
+            const loading = document.getElementById('loading-indicator');
+            const list = document.getElementById('owner-vehicle-list');
+            const errorMsg = document.getElementById('error-message');
+            const tenantName = document.getElementById('tenant-name-display');
+
+            try {
+                // Tembak Webhook n8n lu
+                const response = await fetch(WEBHOOK_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'get', subdomain: HARDCODED_SUBDOMAIN })
+                });
+
+                const rawData = await response.json();
+                console.log("Data mentah n8n:", rawData); // Bisa dicek di Inspect Element > Console
+
+                // Bongkar pelindung Array / JSON dari n8n
+                let resData = Array.isArray(rawData) ? rawData[0] : rawData;
+                if (resData && resData.json) resData = resData.json;
+
+                if (resData && resData.status === 'success') {
+                    const tenantData = resData.data.tenant || {};
+                    globalVehicles = resData.data.vehicles || [];
+
+                    // Ubah text Loading jadi nama Rental
+                    tenantName.innerText = tenantData.nama_rental || HARDCODED_SUBDOMAIN;
+                    
+                    // Render List HTML
+                    renderVehicles();
+
+                    // Sembunyikan loading, tampilkan list
+                    loading.classList.add('hidden');
+                    list.classList.remove('hidden');
+                } else {
+                    throw new Error("Respon server gagal atau struktur JSON salah.");
+                }
+
+            } catch (error) {
+                console.error("Error Detail:", error);
+                loading.classList.add('hidden');
+                errorMsg.innerText = "Gagal memuat: " + error.message;
+                errorMsg.classList.remove('hidden');
+                tenantName.innerText = "Error";
+            }
+        };
+
+        // Fungsi buat nyetak HTML list motor ala Apple UI
+        function renderVehicles() {
+            const list = document.getElementById('owner-vehicle-list');
+            list.innerHTML = '';
+            
+            if(globalVehicles.length === 0) {
+                list.innerHTML = `<p class="text-sm text-gray-400 text-center py-8 border border-dashed border-gray-300 rounded-2xl bg-gray-50">Garasi masih kosong.<br>Data kendaraan belum ada di n8n.</p>`;
+                return;
+            }
+
+            globalVehicles.forEach(v => {
+                const harga = new Intl.NumberFormat('id-ID').format(v.harga_per_hari || 0);
+                const isAvail = v.is_available === true || String(v.is_available).toLowerCase() === "true";
+                
+                list.innerHTML += `
+                    <div class="p-4 border border-gray-200 rounded-2xl bg-white shadow-sm flex items-center justify-between gap-4 transition-all hover:border-gray-300">
+                        <div class="flex items-center gap-3">
+                            <img src="${v.foto_url || 'https://placehold.co/100'}" class="w-12 h-12 rounded-lg object-cover border border-gray-100">
+                            <div>
+                                <h3 class="font-bold text-[15px] leading-tight text-gray-900">${v.nama_kendaraan || 'Tanpa Nama'}</h3>
+                                <p class="text-xs text-brand font-bold mt-0.5">Rp${harga}<span class="text-gray-400 font-medium">/hari</span></p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <div class="w-2.5 h-2.5 rounded-full ${isAvail ? 'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.5)]' : 'bg-red-500'}"></div>
+                            
+                            <button onclick="alert('Nanti buka form edit buat ${v.nama_kendaraan}')" class="p-2 bg-gray-50 hover:bg-gray-100 rounded-full transition-colors border border-gray-200 active:scale-90">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-600"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+    </script>
+</body>
+</html>
