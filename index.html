@@ -127,7 +127,7 @@
                 }
             } catch (err) {
                 showAlert('Gagal terhubung ke server.', true);
-            } finaly {
+            } finally {
                 btn.innerHTML = 'Masuk ke Dashboard'; btn.disabled = false;
             }
         }
@@ -164,7 +164,6 @@
             
             // Eksekusi pemindahan UI secara instan & bersih
             setTimeout(() => {
-                document.getElementById('add-vehicle-form')?.reset(); // Reset form jika ada
                 document.getElementById('form-register').reset();
                 globalGeneratedTenantId = '';
                 document.getElementById('preview-tenant').innerText = '...';
