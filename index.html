@@ -155,7 +155,7 @@
                 logo_url: '' 
             };
 
-            // Kirim data ke background
+            // Kirim data ke background N8N
             fetch(WEBHOOK_URL, { 
                 method: 'POST', 
                 headers: { 'Content-Type': 'application/json' },
@@ -164,7 +164,7 @@
             
             // Eksekusi pemindahan UI secara instan & bersih
             setTimeout(() => {
-                document.getElementById('form-register').reset();
+                e.target.reset(); // FIX: Reset spesifik form pendaftaran
                 globalGeneratedTenantId = '';
                 document.getElementById('preview-tenant').innerText = '...';
                 
