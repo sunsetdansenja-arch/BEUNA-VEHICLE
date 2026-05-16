@@ -49,11 +49,10 @@
                 <p class="text-xs text-gray-500 mt-1">Daftarkan rental Anda kurang dari semenit.</p>
             </div>
             <form onsubmit="handleRegister(event)" class="space-y-3">
-                <input type="text" id="r-nama" required placeholder="Nama Rental (Contoh: Budi Motor)" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand font-medium">
-                
                 <div>
-                    <input type="text" id="r-tenant" required oninput="formatTenantId(this)" placeholder="ID Link (Tanpa spasi)" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand font-bold text-brand">
-                    <p class="text-[10px] text-gray-400 mt-1.5 ml-1 leading-tight">Ini akan jadi link web khusus Anda:<br><span class="text-gray-600 font-medium">.../customer-test.html?tenant=</span><span id="preview-tenant" class="font-bold text-brand">...</span></p>
+                    <label class="block text-xs font-bold text-gray-500 mb-1.5 ml-1">Nama Rental</label>
+                    <input type="text" id="r-nama" required oninput="autoGenerateTenant(this)" placeholder="Contoh: Budi Motor" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand font-medium">
+                    <p class="text-[10px] text-gray-400 mt-1.5 ml-1 leading-tight">Link customer otomatis:<br><span class="text-gray-600 font-medium">.../customer-test.html?tenant=</span><span id="preview-tenant" class="font-bold text-brand">...</span></p>
                 </div>
 
                 <div class="pt-2 border-t border-gray-100"></div>
@@ -71,6 +70,7 @@
 
     <script>
         const WEBHOOK_URL = 'https://n8n-mzbmiib3etk4.kangkung.sumopod.my.id/webhook/beuna-vr-api';
+        let globalGeneratedTenantId = '';
 
         function switchTab(tab) {
             document.getElementById('form-login').classList.toggle('active', tab === 'login');
@@ -82,9 +82,10 @@
             document.getElementById('alert-msg').classList.add('hidden');
         }
 
-        function formatTenantId(input) {
+        // GENERATOR OTOMATIS BERDASARKAN NAMA RENTAL
+        function autoGenerateTenant(input) {
             let val = input.value.toLowerCase().replace(/[^a-z0-9]/g, '');
-            input.value = val;
+            globalGeneratedTenantId = val;
             document.getElementById('preview-tenant').innerText = val || '...';
         }
 
@@ -114,7 +115,6 @@
                 });
                 
                 let d = await res.json();
-                
                 d = Array.isArray(d) ? d[0] : d; 
                 if (d && d.json) d = d.json;
 
@@ -127,20 +127,26 @@
                 }
             } catch (err) {
                 showAlert('Gagal terhubung ke server.', true);
-            } finally {
+            } finaly {
                 btn.innerHTML = 'Masuk ke Dashboard'; btn.disabled = false;
             }
         }
 
-        // FUNGSI DAFTAR TENANT BARU (OPTIMISTIC UI - ANTI STUCK)
+        // FUNGSI DAFTAR TENANT BARU (AUTO SWITCH & CLEAN)
         function handleRegister(e) {
             e.preventDefault();
+            
+            if(!globalGeneratedTenantId) {
+                alert("Harap masukkan Nama Rental yang valid.");
+                return;
+            }
+
             const btn = document.getElementById('btn-register');
             btn.innerHTML = 'Menyimpan...'; btn.disabled = true;
 
             const payload = {
                 action: 'register_tenant',
-                tenant_id: document.getElementById('r-tenant').value,
+                tenant_id: globalGeneratedTenantId,
                 nama_rental: document.getElementById('r-nama').value,
                 no_wa_owner: document.getElementById('r-wa').value.replace(/\D/g, ''),
                 email: document.getElementById('r-email').value.trim(),
@@ -149,24 +155,27 @@
                 logo_url: '' 
             };
 
-            // Tembak data ke n8n tanpa nunggu balasan (Fire and Forget)
+            // Kirim data ke background
             fetch(WEBHOOK_URL, { 
                 method: 'POST', 
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload) 
-            }).catch(err => console.log("Proses background n8n jalan."));
+            }).catch(err => console.log("Background process."));
             
-            // Langsung munculin notif sukses & redirect ke login
+            // Eksekusi pemindahan UI secara instan & bersih
             setTimeout(() => {
-                showAlert('Pendaftaran Berhasil! Silakan Masuk.');
+                document.getElementById('add-vehicle-form')?.reset(); // Reset form jika ada
                 document.getElementById('form-register').reset();
+                globalGeneratedTenantId = '';
                 document.getElementById('preview-tenant').innerText = '...';
                 
                 btn.innerHTML = 'Daftar Sekarang'; 
                 btn.disabled = false;
                 
-                setTimeout(() => switchTab('login'), 2000);
-            }, 1200); 
+                // Langsung balik ke halaman login & kasih info sukses
+                switchTab('login');
+                showAlert('Pendaftaran Berhasil! Silakan Masuk menggunakan akun Anda.');
+            }, 1000); 
         }
     </script>
 </body>
