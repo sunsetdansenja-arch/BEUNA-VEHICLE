@@ -1,343 +1,611 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Customer Dashboard</title>
-  <style>
-    /* 1. Global & Typography (Apple Vibe) */
-    :root {
-      --bg-color: #f5f5f7; /* Warna abu-abu khas Apple OS */
-      --text-main: #1d1d1f;
-      --text-muted: #86868b;
-      --glass-bg: rgba(255, 255, 255, 0.6);
-      --glass-border: rgba(255, 255, 255, 0.3);
-      --accent-color: #0071e3;
-      --danger-color: #ff3b30;
-      --radius-lg: 20px;
-      --radius-md: 12px;
-    }
-
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "San Francisco", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      background-color: var(--bg-color);
-      color: var(--text-main);
-      display: flex;
-      min-height: 100vh;
-      -webkit-font-smoothing: antialiased;
-    }
-
-    /* 2. Glassmorphism Utilities */
-    .glass-panel {
-      background: var(--glass-bg);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      border: 1px solid var(--glass-border);
-      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.04);
-      border-radius: var(--radius-lg);
-    }
-
-    /* 3. Layout: Sidebar & Main */
-    aside.sidebar {
-      width: 260px;
-      padding: 24px;
-      margin: 16px;
-      display: flex;
-      flex-direction: column;
-      gap: 32px;
-    }
-
-    .brand h2 {
-      font-size: 1.25rem;
-      font-weight: 600;
-      letter-spacing: -0.5px;
-    }
-
-    nav ul {
-      list-style: none;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-
-    nav a {
-      text-decoration: none;
-      color: var(--text-muted);
-      font-weight: 500;
-      padding: 10px 16px;
-      border-radius: var(--radius-md);
-      transition: all 0.2s ease;
-      display: block;
-    }
-
-    nav a:hover, nav a.active {
-      background: rgba(0, 0, 0, 0.05);
-      color: var(--text-main);
-    }
-
-    main.content {
-      flex: 1;
-      padding: 16px 32px 32px 0;
-      display: flex;
-      flex-direction: column;
-      gap: 24px;
-    }
-
-    /* 4. Header & Power User Shortcuts */
-    header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 16px 0;
-    }
-
-    header h1 {
-      font-size: 1.75rem;
-      font-weight: 600;
-      letter-spacing: -0.5px;
-    }
-
-    .search-bar {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      background: var(--glass-bg);
-      padding: 8px 16px;
-      border-radius: var(--radius-md);
-      border: 1px solid var(--glass-border);
-      color: var(--text-muted);
-      font-size: 0.9rem;
-    }
-
-    kbd {
-      background: rgba(0,0,0,0.05);
-      padding: 2px 6px;
-      border-radius: 4px;
-      font-family: inherit;
-      font-size: 0.8rem;
-    }
-
-    /* 5. Metrics Section (Hover Micro-interactions) */
-    .metrics-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-      gap: 16px;
-    }
-
-    .metric-card {
-      padding: 24px;
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
-    }
-
-    .metric-card:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
-    }
-
-    .metric-card h3 {
-      font-size: 0.9rem;
-      color: var(--text-muted);
-      font-weight: 500;
-      margin-bottom: 8px;
-    }
-
-    .metric-card .value {
-      font-size: 2rem;
-      font-weight: 600;
-      letter-spacing: -1px;
-    }
-
-    /* 6. Table & Data Security (Hapus Only) */
-    .data-section {
-      padding: 24px;
-    }
-
-    .data-section h2 {
-      font-size: 1.25rem;
-      margin-bottom: 16px;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      text-align: left;
-    }
-
-    th, td {
-      padding: 16px 12px;
-      border-bottom: 1px solid rgba(0,0,0,0.05);
-    }
-
-    th {
-      font-size: 0.85rem;
-      color: var(--text-muted);
-      font-weight: 500;
-    }
-
-    /* Button Micro-interactions */
-    .btn-danger {
-      background: transparent;
-      color: var(--danger-color);
-      border: 1px solid var(--danger-color);
-      padding: 6px 16px;
-      border-radius: 20px;
-      font-size: 0.85rem;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all 0.15s ease;
-    }
-
-    .btn-danger:hover {
-      background: var(--danger-color);
-      color: white;
-    }
-
-    .btn-danger:active {
-      transform: scale(0.94);
-    }
-
-    /* 7. Empty/Loading State Container */
-    .empty-state {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 48px 24px;
-      text-align: center;
-    }
-
-    .empty-state p {
-      color: var(--text-muted);
-      margin-top: 12px;
-    }
-
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Etalase | RentalinBy</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: '#FF5A00',
+                        'brand-hover': '#e04f00'
+                    },
+                    fontFamily: {
+                        sans: ['-apple-system', 'BlinkMacSystemFont', '"San Francisco"', '"Segoe UI"', 'Roboto', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        ::-webkit-scrollbar { display: none; }
+        body { -ms-overflow-style: none; scrollbar-width: none; background-color: #f5f5f7; }
+        .step-section { display: none; animation: fadeIn 0.3s ease; }
+        .step-section.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateX(10px); } to { opacity: 1; transform: translateX(0); } }
+    </style>
 </head>
-<body>
+<body class="text-gray-900 antialiased min-h-screen">
 
-  <!-- Sidebar Navigasi -->
-  <aside class="sidebar glass-panel">
-    <div class="brand">
-      <h2>AppBoilerplate</h2>
-    </div>
-    <nav>
-      <ul>
-        <li><a href="#" class="active">Ringkasan</a></li>
-        <li><a href="#">Riwayat Transaksi</a></li>
-        <li><a href="#">Pelanggan</a></li>
-        <li><a href="#">Pengaturan</a></li>
-      </ul>
-    </nav>
-  </aside>
+    <div class="max-w-md mx-auto min-h-screen bg-white shadow-xl shadow-gray-200/50 border-x border-gray-100 relative overflow-hidden Richmond flex flex-col">
+        
+        <header class="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100 px-5 py-4 flex items-center gap-3">
+            <button id="btn-back" onclick="handleBack()" class="hidden p-2 -ml-2 rounded-full hover:bg-gray-100 transition-colors">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+            </button>
+            <div class="flex items-center gap-3">
+                <img id="cust-logo" src="https://placehold.co/100" class="w-9 h-9 rounded-full border border-gray-200 object-cover bg-gray-50 hidden">
+                <div>
+                    <h1 id="cust-title" class="font-bold text-[15px] tracking-tight leading-none">Loading...</h1>
+                    <p id="cust-bio" class="text-[11px] text-gray-500 mt-0.5 line-clamp-1">Menghubungkan ke server</p>
+                </div>
+            </div>
+        </header>
 
-  <!-- Konten Utama -->
-  <main class="content">
-    
-    <!-- Header -->
-    <header>
-      <h1>Ringkasan Dasbor</h1>
-      <div class="search-bar">
-        <span>Cari data...</span>
-        <kbd>⌘ K</kbd>
-      </div>
-    </header>
-
-    <!-- Widget Metrik -->
-    <section class="metrics-grid">
-      <article class="metric-card glass-panel">
-        <h3>Total Operasional</h3>
-        <p class="value">1,240</p>
-      </article>
-      
-      <article class="metric-card glass-panel">
-        <h3>Status Sistem</h3>
-        <p class="value" style="color: #34c759;">Online</p>
-      </article>
-
-      <!-- Contoh Container Animasi Lottie/Loading -->
-      <article class="metric-card glass-panel">
-        <h3>Sinkronisasi Data</h3>
-        <!-- Elemen ini siap diganti dengan animasi Lottie via JS -->
-        <div class="lottie-wrapper" aria-hidden="true" style="height: 38px; display: flex; align-items: center; color: var(--text-muted); font-size: 0.9rem;">
-          <i>Memuat data...</i>
+        <div id="loading-indicator" class="text-center py-20 flex-1">
+            <svg class="animate-spin h-8 w-8 text-brand mx-auto mb-3" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+            <p class="text-sm text-gray-500 font-medium">Memuat garasi...</p>
         </div>
-      </article>
-    </section>
 
-    <!-- Tabel Data (Menggunakan Hapus, bukan Edit) -->
-    <section class="data-section glass-panel">
-      <h2>Riwayat Terbaru</h2>
-      <table>
-        <thead>
-          <tr>
-            <th>ID Referensi</th>
-            <th>Tanggal</th>
-            <th>Status</th>
-            <th>Aksi</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>#TRX-001</td>
-            <td>16 Mei 2026</td>
-            <td>Selesai</td>
-            <td>
-              <!-- Eksekusi API menggunakan atribut data-* -->
-              <button class="btn-danger" data-action="delete" data-record-id="TRX-001">
-                Hapus
-              </button>
-            </td>
-          </tr>
-          <tr>
-            <td>#TRX-002</td>
-            <td>15 Mei 2026</td>
-            <td>Selesai</td>
-            <td>
-              <button class="btn-danger" data-action="delete" data-record-id="TRX-002">
-                Hapus
-              </button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+        <div id="error-message" class="hidden m-5 text-center py-6 text-red-500 bg-red-50 rounded-xl border border-red-100 text-sm font-medium"></div>
 
-      <!-- Contoh Empty State (Hapus komentar untuk melihat) -->
-      <!--
-      <div class="empty-state">
-        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="color: #d2d2d7;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="9" y1="15" x2="15" y2="15"></line></svg>
-        <p>Belum ada riwayat baru minggu ini.</p>
-      </div>
-      -->
-    </section>
+        <main class="flex-1 overflow-y-auto pb-32">
+            
+            <div id="catalog-section" class="hidden p-5 space-y-4">
+                
+                <div class="space-y-3">
+                    <input type="text" id="search-armada" oninput="renderCatalog()" placeholder="Cari Vario, Brio, Nmax..." class="w-full bg-gray-100 border border-transparent rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand focus:bg-white transition-all">
+                    
+                    <div class="flex gap-2 text-xs font-bold">
+                        <button onclick="setCategoryFilter('Semua')" id="pill-Semua" class="px-4 py-2 rounded-full bg-black text-white shadow-sm transition-all">🏢 Semua</button>
+                        <button onclick="setCategoryFilter('Motor')" id="pill-Motor" class="px-4 py-2 rounded-full bg-gray-100 text-gray-600 transition-all">🏍️ Motor</button>
+                        <button onclick="setCategoryFilter('Mobil')" id="pill-Mobil" class="px-4 py-2 rounded-full bg-gray-100 text-gray-600 transition-all">🚗 Mobil</button>
+                    </div>
+                </div>
 
-  </main>
+                <div id="vehicle-list" class="space-y-4 pt-2"></div>
+            </div>
 
-  <script>
-    // Logika frontend ringan untuk integrasi aksi penghapusan
-    document.querySelectorAll('[data-action="delete"]').forEach(button => {
-      button.addEventListener('click', function() {
-        const recordId = this.getAttribute('data-record-id');
-        
-        // Animasi snappy tambahan saat diklik
-        this.innerHTML = "Menghapus...";
-        this.style.opacity = "0.7";
-        this.style.pointerEvents = "none";
+            <div id="form-section" class="hidden">
+                
+                <div class="px-5 pt-4 pb-2">
+                    <div class="flex items-center justify-between text-[10px] font-bold text-gray-400 mb-2 tracking-wider uppercase">
+                        <span id="step-indicator-text">Langkah 1 dari 3</span>
+                        <span id="step-title-text" class="text-brand">Waktu Sewa</span>
+                    </div>
+                    <div class="flex gap-2 w-full h-1.5 rounded-full overflow-hidden">
+                        <div id="bar-1" class="flex-1 bg-brand transition-colors"></div>
+                        <div id="bar-2" class="flex-1 bg-gray-200 transition-colors"></div>
+                        <div id="bar-3" class="flex-1 bg-gray-200 transition-colors"></div>
+                    </div>
+                </div>
 
-        // Simulasi hit ke endpoint backend (misal via n8n webhook)
-        console.log(`Trigger delete sequence for: ${recordId}`);
-        
-        // Contoh feedback visual setelah proses berhasil
-        setTimeout(() => {
-          this.closest('tr').style.display = 'none';
-        }, 800);
-      });
-    });
-  </script>
+                <div class="px-5 mb-4">
+                    <div id="selected-vehicle-preview" class="p-3 rounded-2xl bg-gray-50 border border-gray-100 flex gap-4 items-center"></div>
+                </div>
+                
+                <form id="booking-form" onsubmit="submitBooking(event)" class="px-5 space-y-5">
+                    <input type="hidden" id="form-vehicle-id">
+                    
+                    <div id="step-1" class="step-section active">
+                        <h2 class="text-xl font-bold mb-4 tracking-tight">Kapan mau dipakai?</h2>
+                        
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-xs font-bold text-gray-500 mb-1.5 ml-1">Waktu Mulai</label>
+                                <input type="datetime-local" id="waktu_mulai" required onchange="handleWaktuMulaiChange()" class="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-[15px] focus:outline-none focus:ring-2 focus:ring-brand font-medium">
+                            </div>
+
+                            <div class="flex flex-wrap gap-2">
+                                <button type="button" onclick="addDays(1)" class="px-3 py-1.5 text-xs font-bold bg-gray-100 text-gray-600 hover:bg-gray-200 rounded-lg transition-colors border border-gray-200">+1 Hari</button>
+                                <button type="button" onclick="addDays(2)" class="px-3 py-1.5 text-xs font-bold bg-gray-100 text-gray-600 hover:bg-gray-200 rounded-lg transition-colors border border-gray-200">+2 Hari</button>
+                                <button type="button" onclick="addDays(3)" class="px-3 py-1.5 text-xs font-bold bg-gray-100 text-gray-600 hover:bg-gray-200 rounded-lg transition-colors border border-gray-200">+3 Hari</button>
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-bold text-gray-500 mb-1.5 ml-1">Waktu Selesai</label>
+                                <input type="datetime-local" id="waktu_selesai" required onchange="calculatePrice()" class="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-[15px] focus:outline-none focus:ring-2 focus:ring-brand font-medium">
+                            </div>
+
+                            <div class="flex items-center justify-between p-4 border border-gray-200 rounded-xl bg-gray-50 mt-2">
+                                <div class="text-sm font-bold text-gray-700">Jumlah Helm</div>
+                                <div class="flex items-center gap-3">
+                                    <button type="button" onclick="ubahJumlah('helm', -1)" class="w-8 h-8 rounded-full bg-white border border-gray-200 flex items-center justify-center font-bold active:scale-90">-</button>
+                                    <span id="jumlah_helm_display" class="font-bold w-4 text-center">2</span>
+                                    <button type="button" onclick="ubahJumlah('helm', 1)" class="w-8 h-8 rounded-full bg-white border border-gray-200 flex items-center justify-center font-bold active:scale-90">+</button>
+                                    <input type="hidden" id="jumlah_helm" value="2">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="step-2" class="step-section">
+                        <h2 class="text-xl font-bold mb-4 tracking-tight">Armada mau diantar ke mana?</h2>
+                        
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-xs font-bold text-gray-500 mb-1.5 ml-1">Lokasi Antar / Jemput</label>
+                                <select id="alamat_dropdown" onchange="toggleAlamatArea()" class="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-[15px] focus:outline-none focus:ring-2 focus:ring-brand font-bold text-gray-700">
+                                    <option value="Share lokasi via WhatsApp">📍 Share lokasi via WhatsApp</option>
+                                    <option value="Belum tau lokasinya">🤷‍♂️ Belum tau lokasinya</option>
+                                    <option value="manual">✍️ Ketik alamat manual</option>
+                                </select>
+                            </div>
+
+                            <div id="alamat_manual_area" class="hidden">
+                                <textarea id="alamat_antar" rows="3" placeholder="Contoh: Hotel Hermes Banda Aceh, Kamar 102" class="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-[15px] focus:outline-none focus:ring-2 focus:ring-brand font-medium"></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="step-3" class="step-section">
+                        <h2 class="text-xl font-bold mb-3 tracking-tight">Konfirmasi & Data Diri</h2>
+                        
+                        <div id="mini-struk" class="p-4 bg-gray-50 border border-gray-200 rounded-2xl mb-4 text-xs space-y-1.5 font-medium text-gray-600">
+                            </div>
+                        
+                        <div class="space-y-4">
+                            <div>
+                                <input type="text" id="nama_lengkap" placeholder="Nama Lengkap (Sesuai KTP)" class="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-[15px] focus:outline-none focus:ring-2 focus:ring-brand font-medium">
+                            </div>
+                            <div>
+                                <input type="tel" id="no_wa_customer" placeholder="No. WhatsApp Aktif (Contoh: 0852...)" class="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-[15px] focus:outline-none focus:ring-2 focus:ring-brand font-medium">
+                            </div>
+                            
+                            <div>
+                                <input type="text" id="akun_sosmed" placeholder="@Username IG / TikTok" class="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-[15px] focus:outline-none focus:ring-2 focus:ring-brand font-medium">
+                                <p class="text-[10px] text-gray-400 mt-1 ml-1">*Biar verifikasi admin berjalan lebih cepat</p>
+                            </div>
+
+                            <div>
+                                <input type="text" id="pekerjaan" placeholder="Pekerjaan Sekarang" class="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-[15px] focus:outline-none focus:ring-2 focus:ring-brand font-medium">
+                            </div>
+
+                            <div>
+                                <input type="tel" id="no_darurat" placeholder="No. Darurat (Keluarga / Teman)" class="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-[15px] focus:outline-none focus:ring-2 focus:ring-brand font-medium">
+                            </div>
+
+                            <div class="p-4 rounded-xl bg-gray-50 border border-gray-200 text-xs text-gray-500 font-medium leading-relaxed">
+                                Jaminan Dokumen KTP/SIM tidak perlu diupload di web. Cukup difoto dan kirim via WhatsApp pada langkah selanjutnya.
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </main>
+
+        <div id="footer-nav" class="hidden fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-md border-t border-gray-100 max-w-md mx-auto z-40 p-5">
+            <div id="price-display-container" class="hidden justify-between items-center mb-3">
+                <span class="text-sm font-bold text-gray-500">Estimasi Total</span>
+                <span id="price-display" class="text-xl font-bold text-brand">Rp0</span>
+            </div>
+            
+            <div class="flex gap-3">
+                <button type="button" id="btn-prev" onclick="prevStep()" class="hidden w-1/3 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-3.5 rounded-2xl active:scale-95 transition-all text-[15px]">
+                    Kembali
+                </button>
+                <button type="button" id="btn-next" onclick="nextStep()" class="flex-1 bg-black text-white font-bold py-3.5 rounded-2xl active:scale-95 transition-all text-[15px]">
+                    Lanjut
+                </button>
+                <button type="button" id="btn-submit" onclick="document.getElementById('booking-form').requestSubmit()" class="hidden flex-1 bg-brand hover:bg-brand-hover text-white font-bold py-3.5 rounded-2xl shadow-lg shadow-orange-500/30 active:scale-95 transition-all flex justify-center items-center gap-2 text-[15px]">
+                    Booking via WA
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        const WEBHOOK_URL = 'https://n8n-mzbmiib3etk4.kangkung.sumopod.my.id/webhook/beuna-vr-api';
+        const HARDCODED_SUBDOMAIN = 'mototest';
+
+        let globalTenant = {};
+        let globalVehicles = [];
+        let selectedVehicle = {};
+        let currentVehiclePrice = 0;
+        let currentStep = 1;
+        let currentCategoryFilter = 'Semua';
+
+        // 1. INIT LOAD
+        window.onload = async function init() {
+            const loading = document.getElementById('loading-indicator');
+            const catalog = document.getElementById('catalog-section');
+            const errorMsg = document.getElementById('error-message');
+
+            // Set Min Date ke Waktu Sekarang
+            const now = new Date();
+            now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+            const minDate = now.toISOString().slice(0, 16);
+            document.getElementById('waktu_mulai').min = minDate;
+            document.getElementById('waktu_selesai').min = minDate;
+
+            try {
+                const response = await fetch(WEBHOOK_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'get', subdomain: HARDCODED_SUBDOMAIN })
+                });
+
+                const rawData = await response.json();
+                let resData = Array.isArray(rawData) ? rawData[0] : rawData;
+                if (resData && resData.json) resData = resData.json;
+
+                if (resData && resData.status === 'success') {
+                    globalTenant = resData.data.tenant || {};
+                    globalVehicles = resData.data.vehicles || [];
+
+                    document.getElementById('cust-title').innerText = globalTenant.nama_rental || HARDCODED_SUBDOMAIN;
+                    document.getElementById('cust-bio').innerText = globalTenant.bio_deskripsi || 'Sewa kendaraan terpercaya & termurah.';
+                    const logoEl = document.getElementById('cust-logo');
+                    logoEl.src = globalTenant.logo_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(globalTenant.nama_rental)}&background=FF5A00&color=fff`;
+                    logoEl.classList.remove('hidden');
+
+                    renderCatalog();
+                    loading.classList.add('hidden');
+                    catalog.classList.remove('hidden');
+                } else {
+                    throw new Error("Gagal mengambil data katalog rental.");
+                }
+            } catch (error) {
+                loading.classList.add('hidden');
+                errorMsg.innerText = error.message;
+                errorMsg.classList.remove('hidden');
+            }
+        };
+
+        // 2. FILTER KATEGORI PILLS
+        function setCategoryFilter(category) {
+            currentCategoryFilter = category;
+            ['Semua', 'Motor', 'Mobil'].forEach(cat => {
+                const btn = document.getElementById('pill-' + cat);
+                if (cat === category) {
+                    btn.className = "px-4 py-2 rounded-full bg-black text-white shadow-sm transition-all";
+                } else {
+                    btn.className = "px-4 py-2 rounded-full bg-gray-100 text-gray-600 transition-all";
+                }
+            });
+            renderCatalog();
+        }
+
+        // 3. RENDER KATALOG DENGAN SEARCH & FILTER
+        function renderCatalog() {
+            const list = document.getElementById('vehicle-list');
+            const searchQuery = document.getElementById('search-armada').value.toLowerCase();
+            list.innerHTML = '';
+            
+            // Filter Data Sekaligus (Kategori + Pencarian)
+            let filtered = globalVehicles.filter(v => {
+                const matchSearch = (v.nama_kendaraan || "").toLowerCase().includes(searchQuery);
+                const tipeStr = (v.tipe_kendaraan || "").toLowerCase();
+                
+                if (currentCategoryFilter === 'Semua') return matchSearch;
+                return matchSearch && tipeStr.includes(currentCategoryFilter.toLowerCase());
+            });
+
+            if(filtered.length === 0) {
+                list.innerHTML = `<p class="text-sm text-gray-400 text-center py-10">Armada tidak ditemukan.</p>`;
+                return;
+            }
+
+            filtered.forEach(v => {
+                const harga = new Intl.NumberFormat('id-ID').format(v.harga_per_hari || 0);
+                const isAvail = v.is_available === true || String(v.is_available).toLowerCase() === "true" || String(v.is_available) === "1";
+                
+                list.innerHTML += `
+                    <div onclick="${isAvail ? `openForm('${v.vehicle_id}')` : ''}" class="p-3 flex gap-4 border border-gray-200 rounded-2xl bg-white shadow-sm transition-all active:scale-[0.98] ${!isAvail ? 'opacity-50 grayscale' : 'cursor-pointer hover:border-gray-300'}">
+                        <div class="w-[90px] h-[90px] rounded-xl overflow-hidden shrink-0 bg-gray-100 border border-gray-100">
+                            <img src="${v.foto_url || 'https://placehold.co/200x200?text=Sewa'}" class="w-full h-full object-cover">
+                        </div>
+                        <div class="flex-1 flex flex-col justify-between py-1 pr-1">
+                            <div>
+                                <h3 class="font-bold text-[15px] leading-tight text-gray-900">${v.nama_kendaraan || 'Kendaraan'}</h3>
+                                <p class="text-brand font-bold text-sm mt-1">Rp${harga}<span class="text-[10px] text-gray-400 font-normal">/hari</span></p>
+                            </div>
+                            <div class="mt-2 text-right">
+                                ${isAvail 
+                                    ? `<span class="text-[11px] font-bold bg-black text-white px-4 py-1.5 rounded-full inline-block shadow-sm">Pilih Unit</span>` 
+                                    : `<span class="text-[11px] font-semibold bg-gray-100 text-gray-500 px-3 py-1 rounded-full">Unit Disewa</span>`
+                                }
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        // 4. KUNCI TANGGAL BACKWARD (Time Travel Bug Fix)
+        function handleWaktuMulaiChange() {
+            const mulaiInput = document.getElementById('waktu_mulai').value;
+            const selesaiInput = document.getElementById('waktu_selesai');
+            
+            if (mulaiInput) {
+                selesaiInput.min = mulaiInput; // Kunci batas minimal waktu selesai
+                if (selesaiInput.value && selesaiInput.value < mulaiInput) {
+                    selesaiInput.value = mulaiInput; // Reset kalau waktu selesai lebih mundur
+                }
+            }
+            calculatePrice();
+        }
+
+        // 5. NAVIGASI MULTI-STEP FORM
+        function openForm(id) {
+            selectedVehicle = globalVehicles.find(v => v.vehicle_id === id);
+            if(!selectedVehicle) return;
+
+            document.getElementById('form-vehicle-id').value = selectedVehicle.vehicle_id;
+            currentVehiclePrice = parseInt(selectedVehicle.harga_per_hari) || 0;
+            
+            const harga = new Intl.NumberFormat('id-ID').format(currentVehiclePrice);
+            document.getElementById('selected-vehicle-preview').innerHTML = `
+                <img src="${selectedVehicle.foto_url || 'https://placehold.co/100'}" class="w-12 h-12 rounded-xl object-cover border border-gray-200 bg-white">
+                <div>
+                    <div class="text-[10px] text-gray-400 font-bold uppercase tracking-wider mb-0.5">Pilihan Anda</div>
+                    <div class="font-bold text-[14px] leading-tight text-gray-900">${selectedVehicle.nama_kendaraan}</div>
+                </div>
+                <div class="ml-auto text-right">
+                    <div class="font-bold text-brand text-xs">Rp${harga}</div>
+                    <div class="text-[10px] text-gray-400">/hari</div>
+                </div>
+            `;
+
+            document.getElementById('catalog-section').classList.add('hidden');
+            document.getElementById('form-section').classList.remove('hidden');
+            document.getElementById('btn-back').classList.remove('hidden');
+            document.getElementById('footer-nav').classList.remove('hidden');
+            
+            currentStep = 1;
+            updateUI();
+            window.scrollTo({ top: 0 });
+        }
+
+        function handleBack() {
+            if (currentStep > 1) {
+                prevStep();
+            } else {
+                document.getElementById('form-section').classList.add('hidden');
+                document.getElementById('footer-nav').classList.add('hidden');
+                document.getElementById('catalog-section').classList.remove('hidden');
+                document.getElementById('btn-back').classList.add('hidden');
+                document.getElementById('booking-form').reset();
+                document.getElementById('price-display-container').classList.add('hidden');
+                toggleAlamatArea();
+            }
+        }
+
+        function nextStep() {
+            if(currentStep === 1) {
+                if(!document.getElementById('waktu_mulai').value || !document.getElementById('waktu_selesai').value) {
+                    alert("Tentukan waktu sewa terlebih dahulu.");
+                    return;
+                }
+            }
+            if(currentStep === 2) {
+                if(document.getElementById('alamat_dropdown').value === 'manual' && !document.getElementById('alamat_antar').value.trim()) {
+                    alert("Harap ketik alamat manual Anda.");
+                    return;
+                }
+            }
+            if (currentStep < 3) {
+                currentStep++;
+                updateUI();
+                window.scrollTo({ top: 0 });
+            }
+        }
+
+        function prevStep() {
+            if (currentStep > 1) {
+                currentStep--;
+                updateUI();
+                window.scrollTo({ top: 0 });
+            }
+        }
+
+        // BUILD MINI STRUK DI STEP 3 (Sunk Cost Fallacy)
+        function generateMiniStruk() {
+            const start = document.getElementById('waktu_mulai').value.replace('T', ' ');
+            const end = document.getElementById('waktu_selesai').value.replace('T', ' ');
+            const dropVal = document.getElementById('alamat_dropdown').value;
+            const alamat = dropVal === 'manual' ? document.getElementById('alamat_antar').value : dropVal;
+            const helm = document.getElementById('jumlah_helm').value;
+
+            const startDate = new Date(document.getElementById('waktu_mulai').value);
+            const endDate = new Date(document.getElementById('waktu_selesai').value);
+            const diffDays = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24)) || 1;
+            const totalHarga = diffDays * currentVehiclePrice;
+
+            document.getElementById('mini-struk').innerHTML = `
+                <div class="font-bold text-gray-800 text-sm border-b border-gray-200 pb-1.5 mb-1.5">Ringkasan Sewa</div>
+                <div>Armada: ${selectedVehicle.nama_kendaraan}</div>
+                <div>Durasi: ${diffDays} Hari (${start} s/d ${end})</div>
+                <div>Lokasi: ${alamat}</div>
+                <div>Fasilitas: ${helm} Helm</div>
+                <div class="font-bold text-brand pt-1 text-sm">Total Biaya: Rp ${new Intl.NumberFormat('id-ID').format(totalHarga)}</div>
+            `;
+        }
+
+        function updateUI() {
+            document.querySelectorAll('.step-section').forEach(el => el.classList.remove('active'));
+            document.getElementById('step-' + currentStep).classList.add('active');
+
+            const titles = ['Waktu Sewa', 'Lokasi', 'Data Diri'];
+            document.getElementById('step-indicator-text').innerText = `Langkah ${currentStep} dari 3`;
+            document.getElementById('step-title-text').innerText = titles[currentStep - 1];
+            
+            document.getElementById('bar-1').className = `flex-1 transition-colors ${currentStep >= 1 ? 'bg-brand' : 'bg-gray-200'}`;
+            document.getElementById('bar-2').className = `flex-1 transition-colors ${currentStep >= 2 ? 'bg-brand' : 'bg-gray-200'}`;
+            document.getElementById('bar-3').className = `flex-1 transition-colors ${currentStep >= 3 ? 'bg-brand' : 'bg-gray-200'}`;
+
+            if(currentStep === 3) {
+                generateMiniStruk(); // Generate struk otomatis pas buka step 3
+            }
+
+            const btnPrev = document.getElementById('btn-prev');
+            const btnNext = document.getElementById('btn-next');
+            const btnSubmit = document.getElementById('btn-submit');
+
+            if (currentStep === 1) {
+                btnPrev.classList.add('hidden');
+                btnNext.classList.remove('hidden');
+                btnSubmit.classList.add('hidden');
+            } else if (currentStep === 2) {
+                btnPrev.classList.remove('hidden');
+                btnNext.classList.remove('hidden');
+                btnSubmit.classList.add('hidden');
+            } else if (currentStep === 3) {
+                btnPrev.classList.remove('hidden');
+                btnNext.classList.add('hidden');
+                btnSubmit.classList.remove('hidden');
+            }
+        }
+
+        // 6. FITUR PENDUKUNG FORM
+        function ubahJumlah(tipe, nilai) {
+            const input = document.getElementById(`jumlah_${tipe}`);
+            const display = document.getElementById(`jumlah_${tipe}_display`);
+            let current = parseInt(input.value) || 0;
+            let newVal = current + nilai;
+            if (newVal < 0) newVal = 0; 
+            input.value = newVal;
+            display.innerText = newVal;
+            if(currentStep === 3) generateMiniStruk();
+        }
+
+        function addDays(days) {
+            let startVal = document.getElementById('waktu_mulai').value;
+            if(!startVal) {
+                const now = new Date();
+                now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+                startVal = now.toISOString().slice(0, 16);
+                document.getElementById('waktu_mulai').value = startVal;
+            }
+            const startDate = new Date(startVal);
+            startDate.setDate(startDate.getDate() + days);
+            startDate.setMinutes(startDate.getMinutes() - startDate.getTimezoneOffset());
+            document.getElementById('waktu_selesai').value = startDate.toISOString().slice(0, 16);
+            handleWaktuMulaiChange();
+        }
+
+        function calculatePrice() {
+            const start = document.getElementById('waktu_mulai').value;
+            const end = document.getElementById('waktu_selesai').value;
+            const container = document.getElementById('price-display-container');
+            const display = document.getElementById('price-display');
+
+            if (start && end && currentVehiclePrice > 0) {
+                const startDate = new Date(start);
+                const endDate = new Date(end);
+                const diffTime = endDate - startDate;
+                
+                if (diffTime > 0) {
+                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                    const total = diffDays * currentVehiclePrice;
+                    display.innerText = 'Rp ' + new Intl.NumberFormat('id-ID').format(total);
+                    container.className = "flex justify-between items-center mb-3";
+                    return;
+                }
+            }
+            container.className = "hidden";
+        }
+
+        function toggleAlamatArea() {
+            const val = document.getElementById('alamat_dropdown').value;
+            const area = document.getElementById('alamat_manual_area');
+            const input = document.getElementById('alamat_antar');
+            if (val === 'manual') {
+                area.classList.remove('hidden');
+                input.required = true;
+            } else {
+                area.classList.add('hidden');
+                input.required = false;
+                input.value = '';
+            }
+        }
+
+        // 7. SUBMIT DATA KE N8N & WHATSAPP (TANPA EMOJI)
+        async function submitBooking(e) {
+            e.preventDefault();
+
+            const nama = document.getElementById('nama_lengkap').value.trim();
+            const rawCustWA = document.getElementById('no_wa_customer').value.trim();
+            
+            if(!nama || !rawCustWA) {
+                alert("Mohon lengkapi Nama dan nomor WhatsApp Anda.");
+                return;
+            }
+
+            // CLEANER FORMATTER WA: Buang spasi, strip, huruf (Murni Angka)
+            const cleanCustWA = rawCustWA.replace(/\D/g, '');
+
+            const btn = document.getElementById('btn-submit');
+            const originalBtnText = btn.innerHTML;
+            btn.innerHTML = `Mohon Tunggu...`;
+            btn.disabled = true;
+
+            const dropVal = document.getElementById('alamat_dropdown').value;
+            const finalAlamat = dropVal === 'manual' ? document.getElementById('alamat_antar').value.trim() : dropVal;
+            const helm = document.getElementById('jumlah_helm').value;
+            const sosmed = document.getElementById('akun_sosmed').value.trim() || '-';
+            const pekerjaan = document.getElementById('pekerjaan').value.trim() || '-';
+            const darurat = document.getElementById('no_darurat').value.replace(/\D/g, '') || '-';
+
+            const payload = {
+                action: 'insert_book',
+                tenant_id: HARDCODED_SUBDOMAIN,
+                vehicle_id: document.getElementById('form-vehicle-id').value,
+                booking_id: 'BK-' + Date.now(),
+                waktu_mulai: document.getElementById('waktu_mulai').value,
+                waktu_selesai: document.getElementById('waktu_selesai').value,
+                alamat_antar: finalAlamat,
+                nama_lengkap: nama,
+                no_wa_customer: cleanCustWA, // Kirim WA bersih ke n8n
+                akun_sosmed: sosmed,
+                pekerjaan: pekerjaan,
+                no_darurat: darurat,
+                jumlah_helm: helm,
+                alamat_jemput: finalAlamat,
+                jumlah_jashujan: 1, 
+                dokumen_jaminan: 'Menyusul via WA',
+                tujuan_penggunaan: 'Sewa Reguler'
+            };
+
+            try {
+                await fetch(WEBHOOK_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                
+                let noWaOwner = globalTenant.no_wa_owner || "08123456789";
+                if(noWaOwner.startsWith('0')) noWaOwner = '62' + noWaOwner.substring(1);
+                
+                // FORMAT TEKS WHATSAPP: 100% BEUNA TANPA EMOJI DAN MENCAKUP SEMUA DATA FORM
+                const waText = `Halo admin ${globalTenant.nama_rental || 'Rental'},\n\n` +
+                               `Saya ingin mengonfirmasi booking sewa kendaraan dengan data berikut:\n\n` +
+                               `DATA KENDARAAN\n` +
+                               `- Unit Armada: ${selectedVehicle.nama_kendaraan}\n` +
+                               `- Waktu Mulai: ${payload.waktu_mulai.replace('T', ' ')}\n` +
+                               `- Waktu Selesai: ${payload.waktu_selesai.replace('T', ' ')}\n` +
+                               `- Lokasi Pengantaran: ${payload.alamat_antar}\n` +
+                               `- Jumlah Helm: ${payload.jumlah_helm}\n\n` +
+                               `DATA DIRI CUSTOMER\n` +
+                               `- Nama Lengkap: ${payload.nama_lengkap}\n` +
+                               `- No WhatsApp: ${payload.no_wa_customer}\n` +
+                               `- Akun Sosial Media: ${payload.akun_sosmed}\n` +
+                               `- Pekerjaan: ${payload.pekerjaan}\n` +
+                               `- Nomor Darurat: ${payload.no_darurat}\n\n` +
+                               `Data diatas sudah tersimpan ke dalam sistem. Mohon untuk segera dikonfirmasi. Terima kasih.`;
+
+                window.location.href = `https://wa.me/${noWaOwner}?text=${encodeURIComponent(waText)}`;
+
+            } catch (error) {
+                alert("Gagal memproses booking. Coba periksa koneksi internet Anda.");
+                btn.innerHTML = originalBtnText;
+                btn.disabled = false;
+            }
+        }
+    </script>
 </body>
 </html>
