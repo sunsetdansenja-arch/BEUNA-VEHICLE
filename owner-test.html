@@ -7,7 +7,14 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
-            theme: { extend: { colors: { brand: '#FF5A00' } }, fontFamily: { sans: ['-apple-system', 'BlinkMacSystemFont', 'sans-serif'] } }
+            theme: { 
+                extend: { 
+                    colors: { brand: '#FF5A00' } 
+                }, 
+                fontFamily: { 
+                    sans: ['-apple-system', 'BlinkMacSystemFont', '"San Francisco"', '"Segoe UI"', 'Roboto', 'sans-serif'] 
+                } 
+            }
         }
     </script>
     <style>
@@ -56,6 +63,7 @@
             </div>
 
             <div id="error-message" class="hidden text-center py-6 text-red-500 bg-red-50 rounded-xl border border-red-100 mb-4 text-sm font-medium"></div>
+            
             <div id="owner-vehicle-list" class="space-y-3 hidden"></div>
         </main>
 
@@ -87,27 +95,33 @@
 
         <div id="add-modal" class="hidden fixed inset-0 bg-black/60 z-[100] flex items-end sm:items-center justify-center sm:p-4 backdrop-blur-sm transition-opacity">
             <div class="bg-white w-full max-w-md rounded-t-3xl sm:rounded-3xl p-6 shadow-2xl relative transform transition-transform translate-y-full sm:translate-y-0" id="add-modal-content">
-                <div class="flex justify-between mb-6"><h2 class="text-xl font-bold">Tambah Armada</h2><button type="button" onclick="toggleModal('add-modal', false)" class="p-2 bg-gray-100 rounded-full">X</button></div>
+                <div class="flex justify-between mb-6"><h2 class="text-xl font-bold tracking-tight">Tambah Armada</h2><button type="button" onclick="toggleModal('add-modal', false)" class="p-2 bg-gray-100 rounded-full">X</button></div>
                 <form id="add-vehicle-form" onsubmit="submitVehicle(event, 'insert')" class="space-y-4">
-                    <input type="text" id="v-name" required placeholder="Nama Armada" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-brand">
-                    <div class="grid grid-cols-2 gap-3"><select id="v-category" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-brand"><option value="Motor">Motor</option><option value="Mobil">Mobil</option></select><select id="v-transmission" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-brand"><option value="Matic">Matic</option><option value="Manual">Manual</option></select></div>
-                    <input type="number" id="v-price" required placeholder="Harga/Hari" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-brand">
-                    <input type="url" id="v-image" placeholder="URL Foto" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-brand">
-                    <button type="submit" id="btn-submit-add" class="w-full bg-black text-white font-bold py-4 rounded-xl active:scale-95">Simpan</button>
+                    <input type="text" id="v-name" required placeholder="Nama Armada" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand font-medium">
+                    <div class="grid grid-cols-2 gap-3">
+                        <select id="v-category" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand font-medium"><option value="Motor">Motor</option><option value="Mobil">Mobil</option></select>
+                        <select id="v-transmission" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand font-medium"><option value="Matic">Matic</option><option value="Manual">Manual</option></select>
+                    </div>
+                    <input type="number" id="v-price" required placeholder="Harga Sewa / Hari" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand font-medium">
+                    <input type="url" id="v-image" placeholder="URL Foto Kendaraan" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand font-medium">
+                    <button type="submit" id="btn-submit-add" class="w-full bg-black text-white font-bold py-4 rounded-xl active:scale-95 transition-all">Simpan ke Garasi</button>
                 </form>
             </div>
         </div>
 
         <div id="edit-modal" class="hidden fixed inset-0 bg-black/60 z-[100] flex items-end sm:items-center justify-center sm:p-4 backdrop-blur-sm transition-opacity">
             <div class="bg-white w-full max-w-md rounded-t-3xl sm:rounded-3xl p-6 shadow-2xl relative transform transition-transform translate-y-full sm:translate-y-0" id="edit-modal-content">
-                <div class="flex justify-between mb-6"><h2 class="text-xl font-bold">Edit Armada</h2><button type="button" onclick="toggleModal('edit-modal', false)" class="p-2 bg-gray-100 rounded-full">X</button></div>
+                <div class="flex justify-between mb-6"><h2 class="text-xl font-bold tracking-tight">Edit Data Armada</h2><button type="button" onclick="toggleModal('edit-modal', false)" class="p-2 bg-gray-100 rounded-full">X</button></div>
                 <form id="edit-vehicle-form" onsubmit="submitVehicle(event, 'update')" class="space-y-4">
                     <input type="hidden" id="e-id"> 
-                    <input type="text" id="e-name" required placeholder="Nama Armada" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-brand">
-                    <div class="grid grid-cols-2 gap-3"><select id="e-category" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-brand"><option value="Motor">Motor</option><option value="Mobil">Mobil</option></select><select id="e-transmission" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-brand"><option value="Matic">Matic</option><option value="Manual">Manual</option></select></div>
-                    <input type="number" id="e-price" required placeholder="Harga/Hari" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-brand">
-                    <input type="url" id="e-image" placeholder="URL Foto" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-brand">
-                    <button type="submit" id="btn-submit-edit" class="w-full bg-brand text-white font-bold py-4 rounded-xl active:scale-95">Update Data</button>
+                    <input type="text" id="e-name" required placeholder="Nama Armada" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand font-medium">
+                    <div class="grid grid-cols-2 gap-3">
+                        <select id="e-category" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand font-medium"><option value="Motor">Motor</option><option value="Mobil">Mobil</option></select>
+                        <select id="e-transmission" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand font-medium"><option value="Matic">Matic</option><option value="Manual">Manual</option></select>
+                    </div>
+                    <input type="number" id="e-price" required placeholder="Harga Sewa / Hari" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand font-medium">
+                    <input type="url" id="e-image" placeholder="URL Foto Kendaraan" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand font-medium">
+                    <button type="submit" id="btn-submit-edit" class="w-full bg-brand text-white font-bold py-4 rounded-xl active:scale-95 transition-all">Update Data Armada</button>
                 </form>
             </div>
         </div>
@@ -117,7 +131,6 @@
     <script>
         const WEBHOOK_URL = 'https://n8n-mzbmiib3etk4.kangkung.sumopod.my.id/webhook/beuna-vr-api';
         
-        // 1. TANGKAP TENANT ID DARI URL
         const urlParams = new URLSearchParams(window.location.search);
         const TENANT_ID = urlParams.get('tenant');
 
@@ -134,8 +147,10 @@
             const list = document.getElementById('owner-vehicle-list');
             const errorMsg = document.getElementById('error-message');
 
+            loading.classList.remove('hidden');
+            list.classList.add('hidden');
+
             try {
-                // KIRIM TENANT DINAMIS KE N8N
                 const response = await fetch(WEBHOOK_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -150,7 +165,6 @@
                     globalTenant = resData.data.tenant || {};
                     globalVehicles = resData.data.vehicles || [];
 
-                    // Jika N8N mengembalikan data tapi objek tenant kosong
                     if(Object.keys(globalTenant).length === 0) {
                         throw new Error("Tenant '" + TENANT_ID + "' tidak ditemukan di database.");
                     }
@@ -171,8 +185,7 @@
         };
 
         function copyCustomerLink() {
-            // GENERATE LINK KHUSUS UNTUK CUSTOMER
-            const baseUrl = window.location.origin + window.location.pathname.replace('owner-test.html', 'customer-test.html');
+            const baseUrl = window.location.origin + '/customer-test.html';
             const customerUrl = `${baseUrl}?tenant=${TENANT_ID}`;
             
             navigator.clipboard.writeText(customerUrl).then(() => {
@@ -251,8 +264,8 @@
 
             const availableUnits = globalVehicles.filter(v => (String(v.is_available) === "true" || String(v.is_available) === "1") && (category === 'Semua' || (v.tipe_kendaraan || "").toLowerCase().includes(category.toLowerCase())));
             
-            const customerUrl = window.location.origin + window.location.pathname.replace('owner-test.html', 'customer-test.html') + '?tenant=' + TENANT_ID;
-            let promoText = `Halo Kak! Ada rencana sewa kendaraan hari ini?\n\nBerikut daftar armada *READY*:\n\n`;
+            const customerUrl = window.location.origin + '/customer-test.html?tenant=' + TENANT_ID;
+            let promoText = `Halo Kak! Ada rencana sewa kendaraan hari ini?\n\nBerikut daftar armada READY:\n\n`;
             
             if (availableUnits.length === 0) promoText += `(Semua unit full disewa 🙏)\n\n`;
             else availableUnits.forEach((v, index) => promoText += `${index + 1}. *${v.nama_kendaraan}* (Rp ${new Intl.NumberFormat('id-ID').format(v.harga_per_hari)}/hr)\n`);
@@ -298,7 +311,7 @@
 
             const payload = {
                 action: isUpdate ? 'update_vehicle' : 'insert_vehicle',
-                tenant_id: TENANT_ID, // MENGGUNAKAN TENANT_ID DINAMIS
+                tenant_id: TENANT_ID, 
                 vehicle_id: isUpdate ? document.getElementById('e-id').value : 'VHC-' + Date.now(),
                 nama_kendaraan: document.getElementById(prefix + 'name').value,
                 tipe_kendaraan: combinedType, 
