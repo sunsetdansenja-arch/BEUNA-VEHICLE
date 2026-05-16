@@ -83,7 +83,6 @@
         }
 
         function formatTenantId(input) {
-            // Memaksa huruf kecil dan menghilangkan spasi/karakter aneh
             let val = input.value.toLowerCase().replace(/[^a-z0-9]/g, '');
             input.value = val;
             document.getElementById('preview-tenant').innerText = val || '...';
@@ -116,11 +115,9 @@
                 
                 let d = await res.json();
                 
-                // Menghandle format data N8N (biasanya array kalau dari node Get)
                 d = Array.isArray(d) ? d[0] : d; 
                 if (d && d.json) d = d.json;
 
-                // Jika data tenant ditemukan (login berhasil)
                 if (d && d.tenant_id) { 
                     window.location.href = 'owner-test.html?tenant=' + d.tenant_id;
                 } else if (Array.isArray(d) && d.length > 0 && d[0].tenant_id) {
@@ -135,8 +132,8 @@
             }
         }
 
-        // FUNGSI DAFTAR TENANT BARU
-        async function handleRegister(e) {
+        // FUNGSI DAFTAR TENANT BARU (OPTIMISTIC UI - ANTI STUCK)
+        function handleRegister(e) {
             e.preventDefault();
             const btn = document.getElementById('btn-register');
             btn.innerHTML = 'Menyimpan...'; btn.disabled = true;
@@ -148,28 +145,28 @@
                 no_wa_owner: document.getElementById('r-wa').value.replace(/\D/g, ''),
                 email: document.getElementById('r-email').value.trim(),
                 password: document.getElementById('r-password').value,
-                bio_deskripsi: 'Sewa kendaraan terpercaya', // Default value
-                logo_url: '' // Kosongkan, biarkan admin isi di pengaturan nanti
+                bio_deskripsi: 'Sewa kendaraan terpercaya', 
+                logo_url: '' 
             };
 
-            try {
-                await fetch(WEBHOOK_URL, { 
-                    method: 'POST', 
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload) 
-                });
-                
+            // Tembak data ke n8n tanpa nunggu balasan (Fire and Forget)
+            fetch(WEBHOOK_URL, { 
+                method: 'POST', 
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload) 
+            }).catch(err => console.log("Proses background n8n jalan."));
+            
+            // Langsung munculin notif sukses & redirect ke login
+            setTimeout(() => {
                 showAlert('Pendaftaran Berhasil! Silakan Masuk.');
                 document.getElementById('form-register').reset();
                 document.getElementById('preview-tenant').innerText = '...';
                 
-                // Pindah ke tab login otomatis setelah 2 detik
+                btn.innerHTML = 'Daftar Sekarang'; 
+                btn.disabled = false;
+                
                 setTimeout(() => switchTab('login'), 2000);
-            } catch (err) {
-                showAlert('Gagal mendaftar. Silakan coba lagi.', true);
-            } finally {
-                btn.innerHTML = 'Daftar Sekarang'; btn.disabled = false;
-            }
+            }, 1200); 
         }
     </script>
 </body>
