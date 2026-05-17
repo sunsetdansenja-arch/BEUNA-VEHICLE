@@ -46,7 +46,7 @@
         <div id="form-register" class="tab-content">
             <div class="text-center mb-6">
                 <h1 class="text-2xl font-bold tracking-tight">Buka Cabang Baru</h1>
-                <p class="text-xs text-gray-500 mt-1">Daftarkan rental Anda kurang dari semenit.</p>
+                <p class="text-xs text-gray-500 mt-1">Gratis uji coba <b>Paket Pemula (5 Armada)</b> selama 14 Hari.</p>
             </div>
             <form onsubmit="handleRegister(event)" class="space-y-3">
                 <div>
@@ -61,7 +61,7 @@
                 <input type="email" id="r-email" required placeholder="Alamat Email" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand font-medium">
                 <input type="password" id="r-password" required placeholder="Buat Password" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand font-medium">
                 
-                <button type="submit" id="btn-register" class="w-full bg-brand text-white font-bold py-3.5 rounded-xl active:scale-95 transition-all shadow-md shadow-brand/20 mt-2">Daftar Sekarang</button>
+                <button type="submit" id="btn-register" class="w-full bg-brand text-white font-bold py-3.5 rounded-xl active:scale-95 transition-all shadow-md shadow-brand/20 mt-2">Mulai 14 Hari Gratis</button>
             </form>
         </div>
 
@@ -82,7 +82,6 @@
             document.getElementById('alert-msg').classList.add('hidden');
         }
 
-        // GENERATOR OTOMATIS BERDASARKAN NAMA RENTAL
         function autoGenerateTenant(input) {
             let val = input.value.toLowerCase().replace(/[^a-z0-9]/g, '');
             globalGeneratedTenantId = val;
@@ -95,7 +94,6 @@
             el.className = `mt-4 text-center text-xs font-bold p-3 rounded-xl block ${isError ? 'bg-red-50 text-red-600 border border-red-200' : 'bg-green-50 text-green-600 border border-green-200'}`;
         }
 
-        // FUNGSI LOGIN
         async function handleLogin(e) {
             e.preventDefault();
             const btn = document.getElementById('btn-login');
@@ -132,7 +130,6 @@
             }
         }
 
-        // FUNGSI DAFTAR TENANT BARU (DENGAN VALIDASI EMAIL)
         async function handleRegister(e) {
             e.preventDefault();
             
@@ -156,7 +153,6 @@
             };
 
             try {
-                // 1. Kirim data dan tunggu balasan N8N
                 const res = await fetch(WEBHOOK_URL, { 
                     method: 'POST', 
                     headers: { 'Content-Type': 'application/json' },
@@ -164,16 +160,12 @@
                 });
                 
                 let data = await res.json();
-
-                // 2. Parser Anti-Stuck buat ngebaca format data dari N8N
                 data = Array.isArray(data) ? data[0] : data; 
                 if (data && data.json) data = data.json;
 
-                // 3. Cek apakah ada status error (email kembar) dari N8N
                 if (data.status === 'error') {
                     showAlert(data.message || 'Email sudah terdaftar! Gunakan email lain.', true);
                 } else {
-                    // Jika sukses, bersihkan form dan pindah tab
                     e.target.reset(); 
                     globalGeneratedTenantId = '';
                     document.getElementById('preview-tenant').innerText = '...';
@@ -184,7 +176,7 @@
             } catch (err) {
                 showAlert('Gagal terhubung ke server. Coba lagi.', true);
             } finally {
-                btn.innerHTML = 'Daftar Sekarang'; 
+                btn.innerHTML = 'Mulai 14 Hari Gratis'; 
                 btn.disabled = false;
             }
         }
