@@ -132,8 +132,8 @@
             }
         }
 
-        // FUNGSI DAFTAR TENANT BARU (AUTO SWITCH & CLEAN)
-        function handleRegister(e) {
+        // FUNGSI DAFTAR TENANT BARU (DENGAN VALIDASI EMAIL)
+        async function handleRegister(e) {
             e.preventDefault();
             
             if(!globalGeneratedTenantId) {
@@ -142,7 +142,7 @@
             }
 
             const btn = document.getElementById('btn-register');
-            btn.innerHTML = 'Menyimpan...'; btn.disabled = true;
+            btn.innerHTML = 'Memeriksa...'; btn.disabled = true;
 
             const payload = {
                 action: 'register_tenant',
@@ -155,26 +155,38 @@
                 logo_url: '' 
             };
 
-            // Kirim data ke background N8N
-            fetch(WEBHOOK_URL, { 
-                method: 'POST', 
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload) 
-            }).catch(err => console.log("Background process."));
-            
-            // Eksekusi pemindahan UI secara instan & bersih
-            setTimeout(() => {
-                e.target.reset(); // FIX: Reset spesifik form pendaftaran
-                globalGeneratedTenantId = '';
-                document.getElementById('preview-tenant').innerText = '...';
+            try {
+                // 1. Kirim data dan tunggu balasan N8N
+                const res = await fetch(WEBHOOK_URL, { 
+                    method: 'POST', 
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload) 
+                });
                 
+                let data = await res.json();
+
+                // 2. Parser Anti-Stuck buat ngebaca format data dari N8N
+                data = Array.isArray(data) ? data[0] : data; 
+                if (data && data.json) data = data.json;
+
+                // 3. Cek apakah ada status error (email kembar) dari N8N
+                if (data.status === 'error') {
+                    showAlert(data.message || 'Email sudah terdaftar! Gunakan email lain.', true);
+                } else {
+                    // Jika sukses, bersihkan form dan pindah tab
+                    e.target.reset(); 
+                    globalGeneratedTenantId = '';
+                    document.getElementById('preview-tenant').innerText = '...';
+                    
+                    switchTab('login');
+                    showAlert('Pendaftaran Berhasil! Silakan Masuk menggunakan akun Anda.');
+                }
+            } catch (err) {
+                showAlert('Gagal terhubung ke server. Coba lagi.', true);
+            } finally {
                 btn.innerHTML = 'Daftar Sekarang'; 
                 btn.disabled = false;
-                
-                // Langsung balik ke halaman login & kasih info sukses
-                switchTab('login');
-                showAlert('Pendaftaran Berhasil! Silakan Masuk menggunakan akun Anda.');
-            }, 1000); 
+            }
         }
     </script>
 </body>
